@@ -29,26 +29,11 @@ public class ContentManager {
     private final HashSet<Pair<VideoData,VideoData>> videosToGenerate = new HashSet<>();
 
     public ContentManager(){
-        // Path to the Chocolatey-installed FFmpeg
-
-        // Tell JAVE to use this executable
-       //Encoder.addOptionAtIndex(ffmpeg);
     }
 
     public void collectMedia(){
-        //scan folder for videos within the quality range and formats we support
-        //look into video file metadata fr
         scanMediaFolder();
         generateMissingMedia();
-
-
-        //fill in the videosToGenerate depending on what we dont have
-//        while (videoDatabase.iterator().hasNext()){
-//           // var video = getvideo()
-//            var next = videoDatabase.iterator().next();
-//            next.getFilename();
-//            next.getFormat();
-//        }
     }
 
     private void scanMediaFolder(){
@@ -151,9 +136,6 @@ public class ContentManager {
         videosToGenerate.clear();
     }
 
-    private void compileMediaList(){
-    }
-
     private void generateVideo(VideoData data, VideoFormatType format, VideoQualityType quality){
         String inputFormat = data.getFormat().toString();
         String outputFormat = format.toString();
@@ -170,6 +152,9 @@ public class ContentManager {
         video.setSize(quality.toVideoSize());
         video.setCodec("h264");
 
+        //audio is still funny, no idea whats up with this honestly
+        //windows media player doesnt support aac/oV/mp4a lmao
+        //mkv files still work at least
         if(format == VideoFormatType.MP4 || format == VideoFormatType.AVI){
             audio.setCodec("aac"); // MP4/AVI
         } else {
@@ -189,7 +174,8 @@ public class ContentManager {
         }
     }
 
-    public static String removeExtension(String filename) {
+    //todo: move to a utils class?
+    private static String removeExtension(String filename) {
         if (filename == null) return null;
         int lastDot = filename.lastIndexOf('.');
         if (lastDot == -1) return filename; //no extension found
