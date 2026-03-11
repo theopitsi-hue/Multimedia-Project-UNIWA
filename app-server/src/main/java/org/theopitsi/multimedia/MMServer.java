@@ -28,14 +28,22 @@ public class MMServer extends Application {
         stage.setTitle("MMServer");
         stage.setScene(new Scene(root));
         stage.show();
+
+
+        contentManager = new ContentManager();
+        contentManager.collectMedia();
+
+//        connectionManager = new ConnectionManager(4);
+//        connectionManager.beginListening(); //this hangs
     }
 
     public static void main(String[] args) {
+        //makes logger more pretty.
+        System.setProperty(
+                "java.util.logging.SimpleFormatter.format",
+                "[%1$tT/%4$s]: %5$s%n"
+        );
+
         launch(args);
-        contentManager = new ContentManager();
-
-        connectionManager = new ConnectionManager(4);
-        connectionManager.beginListening();
-
     }
 }

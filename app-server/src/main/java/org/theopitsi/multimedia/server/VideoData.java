@@ -1,5 +1,6 @@
 package org.theopitsi.multimedia.server;
 
+import lombok.Getter;
 import org.theopitsi.multimedia.server.transmission.VideoFormatType;
 import org.theopitsi.multimedia.server.transmission.VideoQualityType;
 
@@ -31,5 +32,17 @@ public class VideoData {
     @Override
     public int hashCode() {
         return Objects.hash(filename, format, quality);
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public VideoFormatType getFormat() {
+        return format;
+    }
+
+    public VideoQualityType getQuality() {
+        return quality;
     }
 }
