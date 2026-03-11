@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.theopitsi.multimedia.server.ConnectionManager;
+import org.theopitsi.multimedia.server.ContentManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.util.logging.Logger;
 public class MMServer extends Application {
     public static Logger logger = Logger.getLogger("MM-SERVER");
     public static ConnectionManager connectionManager;
+    public static ContentManager contentManager;
 
 
     @Override
@@ -30,6 +32,8 @@ public class MMServer extends Application {
 
     public static void main(String[] args) {
         launch(args);
+        contentManager = new ContentManager();
+
         connectionManager = new ConnectionManager(4);
         connectionManager.beginListening();
 
