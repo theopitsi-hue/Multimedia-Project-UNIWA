@@ -1,29 +1,29 @@
 package org.theopitsi.multimedia;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import org.theopitsi.multimedia.client.Client;
 
-public class MMClient {
+import java.util.logging.Logger;
+
+public class MMClient extends Application {
+    public static Logger logger = Logger.getLogger("MM-CLIENT");
+    private static final int PORT = 5000;
 
     public static void main(String[] args) {
-        String host = "localhost"; // server IP
-        int port = 5000;
+       Client main = new Client();
+       // main.connect("localhost", PORT);
+       launch(args);
+    }
 
-        try (Socket socket = new Socket(host, port);
-             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-             BufferedReader console = new BufferedReader(new InputStreamReader(System.in))
-        ) {
-
-            String userInput = "BOOOOP";
-            out.println(userInput); // send to server
-            System.out.println(in.readLine()); // read response
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    @Override
+    public void start(Stage stage) throws Exception {
+        Parent root = FXMLLoader.load(getClass().getResource("/ui/client.fxml"));
+        stage.setTitle("MMClient");
+        stage.setScene(new Scene(root));
+        stage.show();
     }
 }

@@ -6,20 +6,25 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 public class MMServer {
-    public static void main(String[] args) {
-        int port = 5000; // port number to listen on
+    public static Logger logger = Logger.getLogger("MM-SERVER");
+    private static boolean exiting = false;
+    private static final int PORT = 5000;
 
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Server listening on port " + port);
+    public static void main(String[] args) {
+
+        try {
+            ServerSocket serverSocket = new ServerSocket(PORT);
+            logger.info("Server listening on port " + PORT);
 
             while (true) {
-                Socket clientSocket = serverSocket.accept(); // wait for client
-                System.out.println("Client connected: " + clientSocket.getInetAddress());
-
-                // Handle client in a separate thread
-                new Thread(() -> handleClient(clientSocket)).start();
+                if (exiting){
+                    clean();
+                    break;
+                }
+                captureClients(serverSocket);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -27,17 +32,37 @@ public class MMServer {
     }
 
     private static void handleClient(Socket socket) {
-        try (socket;
-             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)
-        ) {
-            String line;
-            while ((line = in.readLine()) != null) {
-                System.out.println("Received from client: " + line);
-                out.println("Echo: " + line); // send response back
-            }
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /// Stalls execution to wait for client connections.
+    /// Once the client connects, creates a thread to handle them seperately
+    /// so, it can keep waiting for more clients.
+    private static void captureClients(ServerSocket serverSocket){
+        try {
+            //create a socket to accept the client connection
+            Socket clientSocket = serverSocket.accept();
+            logger.info("Client connected: " + clientSocket.getInetAddress());
+
+            //handle client in a separate thread
+            new Thread(() -> handleClient(clientSocket)).start();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void clean(){
+
+    }
+
+    private static void exit(){
+        exiting = true;
     }
 }

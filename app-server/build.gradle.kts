@@ -1,6 +1,6 @@
-
 plugins {
     application
+    id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
 repositories {
@@ -34,4 +34,10 @@ application {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+}
+
+
+javafx {
+    version = "21"
+    modules = listOf("javafx.controls", "javafx.fxml")
 }

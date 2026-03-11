@@ -1,6 +1,8 @@
 
 plugins {
     application
+    id("org.openjfx.javafxplugin") version "0.1.0"
+
 }
 
 repositories {
@@ -26,6 +28,7 @@ dependencies {
     testImplementation("fr.bmartel:jspeedtest:1.32.1")
 
     //FFMPEG
+
 }
 
 java {
@@ -35,9 +38,14 @@ java {
 }
 
 application {
-    mainClass = "org.theopitsi.multimedia.MMClient"
+    mainClass.set("org.theopitsi.multimedia.MMClient")
 }
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+}
+
+javafx {
+    version = "21"
+    modules("javafx.controls", "javafx.fxml")
 }
