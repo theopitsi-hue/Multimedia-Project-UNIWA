@@ -5,15 +5,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.theopitsi.multimedia.server.ConnectionManager;
-import org.theopitsi.multimedia.server.ContentManager;
+import org.theopitsi.multimedia.server.connection.ConnectionManager;
+import org.theopitsi.multimedia.server.media.ContentManager;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.logging.Logger;
 
 public class MMServer extends Application {
@@ -33,8 +27,11 @@ public class MMServer extends Application {
         contentManager = new ContentManager();
         contentManager.collectMedia();
 
-//        connectionManager = new ConnectionManager(4);
-//        connectionManager.beginListening(); //this hangs
+        //manage connections without hanging graphics
+        new Thread(()->{
+            connectionManager = new ConnectionManager(4);
+            connectionManager.beginListening();
+        }).start();
     }
 
     public static void main(String[] args) {

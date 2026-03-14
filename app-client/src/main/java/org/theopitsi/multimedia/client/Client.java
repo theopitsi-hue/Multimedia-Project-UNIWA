@@ -2,18 +2,19 @@ package org.theopitsi.multimedia.client;
 
 import org.theopitsi.multimedia.MMClient;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class Client {
-    private Socket socket;
-    private DataInputStream in;
-    private DataOutputStream out;
+    private final String identifier;
 
-    public Client(){
+    private Socket socket;
+    private InputStream in;
+    private OutputStream out;
+
+    public Client(String name){
+        this.identifier = name;
     }
 
     public void connect(String addr, int port){
@@ -23,10 +24,17 @@ public class Client {
             MMClient.logger.info("Connected");
 
             //takes input from terminal
-            in = new DataInputStream(System.in);
+            in = socket.getInputStream();
 
             //sends output to the socket
-            out = new DataOutputStream(socket.getOutputStream());
+            out = socket.getOutputStream();
+
+            out.write(identifier.getBytes());
+            out.flush();
+
+            in.close();
+            out.close();
+            socket.close();
         }
         catch (UnknownHostException u) {
             System.out.println(u);

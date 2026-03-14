@@ -14,8 +14,14 @@ public class MMClient extends Application {
     private static final int PORT = 5000;
 
     public static void main(String[] args) {
-       Client main = new Client();
-       // main.connect("localhost", PORT);
+        //makes logger more pretty.
+        System.setProperty(
+                "java.util.logging.SimpleFormatter.format",
+                "[%1$tT/%4$s]: %5$s%n"
+        );
+
+       Client main = new Client("Star");
+       main.connect("localhost", PORT);
        launch(args);
     }
 

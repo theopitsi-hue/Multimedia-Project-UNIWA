@@ -1,4 +1,4 @@
-package org.theopitsi.multimedia.server.transmission;
+package org.theopitsi.multimedia.server.media;
 
 public enum VideoFormatType {
     AVI,

@@ -1,10 +1,7 @@
-package org.theopitsi.multimedia.server;
+package org.theopitsi.multimedia.server.media;
 
 import org.graalvm.collections.Pair;
-import org.jspecify.annotations.NonNull;
 import org.theopitsi.multimedia.MMServer;
-import org.theopitsi.multimedia.server.transmission.VideoFormatType;
-import org.theopitsi.multimedia.server.transmission.VideoQualityType;
 import ws.schild.jave.Encoder;
 import ws.schild.jave.EncoderException;
 import ws.schild.jave.MultimediaObject;
@@ -12,7 +9,6 @@ import ws.schild.jave.encode.AudioAttributes;
 import ws.schild.jave.encode.EncodingAttributes;
 import ws.schild.jave.encode.VideoAttributes;
 import ws.schild.jave.info.MultimediaInfo;
-import ws.schild.jave.info.VideoSize;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,9 +16,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.logging.Logger;
 
 public class ContentManager {
+    //todo: have the user be able to set this
     private static final String videoDir = "B:/Code/GitHub/Multimedia-Project-UNIWA/Videos";
 
     private final HashMap<VideoData,Path> videoDatabase = new HashMap<>();
@@ -52,6 +48,8 @@ public class ContentManager {
             throw new RuntimeException(e);
         }
 
+        int count = 0;
+
         for (final File fileEntry : Objects.requireNonNull(folder.listFiles())) {
             if (!fileEntry.isDirectory()) {
                 MMServer.logger.info("Found Video: " + fileEntry.getName());
@@ -77,6 +75,7 @@ public class ContentManager {
                     //packages the data into a compact format to send to client
                     var data = new VideoData(cleanName,format,quality);
                     videoDatabase.put(data,fileEntry.toPath().toAbsolutePath());
+                    count++;
 
                     //generate all missing formats, "queue" em up for creation.
                     for (int f = 0; f < VideoFormatType.values().length; f++) {
@@ -111,10 +110,13 @@ public class ContentManager {
                 }
             }
         }
+        MMServer.logger.warning("Found " + count + " video files.");
+
     }
 
     private void generateMissingMedia(){
         //beep boop generate videos
+
         int totalGenerated = 0;
         for (Pair<VideoData, VideoData> pair : videosToGenerate) {
             var to = pair.getRight();
@@ -124,6 +126,7 @@ public class ContentManager {
             //so we dont generate copies of videos!
             //might beeee slooowwwww
             if (videoDatabase.containsKey(to)) continue;
+            totalGenerated++;
 
 
             MMServer.logger.info("Generating Video: " + to);
@@ -131,7 +134,11 @@ public class ContentManager {
             totalGenerated++;
 
         }
-        MMServer.logger.info("Finished Generating "+totalGenerated+" missing files.");
+        if (totalGenerated>0) {
+            MMServer.logger.info("Finished Generating " + totalGenerated + " missing files.");
+        }else{
+            MMServer.logger.info("No video files missing. Skipping Generation.");
+        }
         //clear todo list
         videosToGenerate.clear();
     }
@@ -156,9 +163,9 @@ public class ContentManager {
         //windows media player doesnt support aac/oV/mp4a lmao
         //mkv files still work at least
         if(format == VideoFormatType.MP4 || format == VideoFormatType.AVI){
-            audio.setCodec("aac"); // MP4/AVI
+            audio.setCodec("aac"); //MP4/AVI
         } else {
-            audio.setCodec("libvorbis"); // MKV
+            audio.setCodec("libvorbis"); //MKV
         }
 
 

@@ -1,8 +1,4 @@
-package org.theopitsi.multimedia.server;
-
-import lombok.Getter;
-import org.theopitsi.multimedia.server.transmission.VideoFormatType;
-import org.theopitsi.multimedia.server.transmission.VideoQualityType;
+package org.theopitsi.multimedia.server.media;
 
 import java.util.Objects;
 
@@ -24,6 +20,8 @@ public class VideoData {
 
     @Override
     public boolean equals(Object o) {
+        //sets the requirements for similiarity. Two data objects are equal only if all their fields are equal
+
         if (o == null || getClass() != o.getClass()) return false;
         VideoData videoData = (VideoData) o;
         return Objects.equals(filename, videoData.filename) && format == videoData.format && quality == videoData.quality;
@@ -31,6 +29,7 @@ public class VideoData {
 
     @Override
     public int hashCode() {
+        //used for identifying each object as unique within a hashmap
         return Objects.hash(filename, format, quality);
     }
 

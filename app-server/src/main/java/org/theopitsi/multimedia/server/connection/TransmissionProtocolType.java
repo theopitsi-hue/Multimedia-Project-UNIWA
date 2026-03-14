@@ -1,7 +1,6 @@
-package org.theopitsi.multimedia.client.transmission;
+package org.theopitsi.multimedia.server.connection;
 
 public enum TransmissionProtocolType {
-    AUTO,
     TCP,
     UDP,
     RTP_UDP
