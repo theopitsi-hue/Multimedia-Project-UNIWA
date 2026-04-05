@@ -20,6 +20,7 @@ public class ConnectionManager {
         //ServerSocket serverSocket = null;
         Socket clientSocket = null;
         ServerSocket serverSocket = null;
+        int i = 1;
 
         try {
             serverSocket = new ServerSocket(PORT);
@@ -36,7 +37,8 @@ public class ConnectionManager {
                 System.out.println("I/O error: " + e);
             }
             // new thread for a client
-            new ClientHandler(clientSocket).start();
+            new ClientHandler(clientSocket,i).start();
+            i++;
         }
     }
 

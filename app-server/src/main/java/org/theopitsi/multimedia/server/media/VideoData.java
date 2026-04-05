@@ -18,6 +18,10 @@ public class VideoData {
         return filename+"_("+quality+")"+"["+format+"]";
     }
 
+    public String toFileName(){
+        return filename+"-"+quality+"."+format;
+    }
+
     @Override
     public boolean equals(Object o) {
         //sets the requirements for similiarity. Two data objects are equal only if all their fields are equal

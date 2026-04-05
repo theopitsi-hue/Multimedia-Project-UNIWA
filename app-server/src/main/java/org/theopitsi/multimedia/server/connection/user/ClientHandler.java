@@ -8,9 +8,11 @@ import java.net.*;
 //Operates for each client connected to the server
 public class ClientHandler extends Thread {
     private Socket client;
+    private final int index;
 
-    public ClientHandler(Socket socket) {
+    public ClientHandler(Socket socket, int i) {
         this.client = socket;
+        this.index = i;
     }
 
     @Override

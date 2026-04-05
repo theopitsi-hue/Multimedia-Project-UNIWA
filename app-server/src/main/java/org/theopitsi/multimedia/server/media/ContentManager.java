@@ -30,6 +30,35 @@ public class ContentManager {
     public void collectMedia(){
         scanMediaFolder();
         generateMissingMedia();
+
+        var w = getVideoFile(new VideoData("drone_footage",VideoFormatType.AVI,VideoQualityType.p360));
+        MMServer.logger.info("What: "+ w.lastModified());
+    }
+
+    private File getVideoFile(VideoData data){
+        Path videosDir = Paths.get(videoDir);
+        final File folder = new File(videoDir);
+
+        if (Files.notExists(videosDir)||!folder.isDirectory()) {
+            MMServer.logger.info("Video folder missing!");
+            return null;
+        }
+
+        String name = data.toFileName();
+        Path toFile = Paths.get(videoDir+"/"+name);
+        final File req = new File(videoDir+"/"+name);
+
+        if (Files.notExists(toFile) || !req.isFile()){
+            MMServer.logger.info("Video file doesn't exist: "+name);
+            return null;
+        }
+
+        if (!req.canRead()){
+            MMServer.logger.info("Video file cannot be read: "+name);
+            return null;
+        }
+
+        return req;
     }
 
     private void scanMediaFolder(){
@@ -139,7 +168,7 @@ public class ContentManager {
         }else{
             MMServer.logger.info("No video files missing. Skipping Generation.");
         }
-        //clear todo list
+        //clear gen list
         videosToGenerate.clear();
     }
 
