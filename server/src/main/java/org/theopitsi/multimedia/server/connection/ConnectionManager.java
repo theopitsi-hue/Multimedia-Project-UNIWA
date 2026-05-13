@@ -16,6 +16,7 @@ public class ConnectionManager {
         this.maxUsers = maxUsers;
     }
 
+    //captures incoming client communication
     public void beginListening() {
         //ServerSocket serverSocket = null;
         Socket clientSocket = null;
@@ -27,7 +28,6 @@ public class ConnectionManager {
             MMServer.logger.info("Server listening on port " + PORT);
         } catch (IOException e) {
             MMServer.logger.warning("Error starting server: " + e.getMessage());
-
         }
 
         while (!exiting) {

@@ -4,7 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.theopitsi.multimedia.client.data.ClientData;
+import org.theopitsi.multimedia.client.data.Client;
 import org.theopitsi.multimedia.client.gui.MediaController;
 
 import java.util.logging.Logger;
@@ -20,7 +20,7 @@ public class MMClient extends Application {
                 "[CLIENT][%1$tT/%4$s]: %5$s%n"
         );
 
-       ClientData main = new ClientData("Star");
+       Client main = new Client("Star");
        main.connect("localhost", PORT);
        launch(args);
     }

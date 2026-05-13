@@ -2,7 +2,7 @@ package org.theopitsi.multimedia.server.media;
 
 import org.graalvm.collections.Pair;
 import org.theopitsi.multimedia.server.MMServer;
-import org.theopitsi.multimedia.server.data.VideoData;
+import org.theopitsi.multimedia.common.data.VideoData;
 import org.theopitsi.multimedia.common.data.VideoFormatType;
 import org.theopitsi.multimedia.common.data.VideoQualityType;
 import ws.schild.jave.Encoder;

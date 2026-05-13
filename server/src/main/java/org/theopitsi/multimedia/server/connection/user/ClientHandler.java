@@ -1,5 +1,7 @@
 package org.theopitsi.multimedia.server.connection.user;
 
+import org.theopitsi.multimedia.common.packet.Packet;
+import org.theopitsi.multimedia.common.packet.dispatch.PacketDispatcher;
 import org.theopitsi.multimedia.server.MMServer;
 
 import java.io.*;
@@ -17,16 +19,12 @@ public class ClientHandler extends Thread {
 
     @Override
     public void run() {
-        InputStream inp = null;
-        BufferedReader brinp = null;
+        DataInputStream in = null;
         DataOutputStream out = null;
 
         try {
-            //create an InputStream and an OutputStream to communicate with the client
-            //todo: buffer these things
-            brinp = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            in = new DataInputStream(client.getInputStream());
             out = new DataOutputStream(client.getOutputStream());
-
 
             var ip = client.getInetAddress().getHostAddress();
             var port = client.getPort();
@@ -36,20 +34,24 @@ public class ClientHandler extends Thread {
         } catch (IOException e) {
             MMServer.logger.warning(e.getLocalizedMessage());
             e.printStackTrace();
+            return;
         }
 
-        String line;
+        // main loop
         while (true) {
             try {
-                line = brinp.readLine();
-                if ((line == null) || line.equalsIgnoreCase("QUIT")) {
-                    client.close();
-                    return;
-                } else {
-                    MMServer.logger.info("Client: "+line+"\n");
-                }
+                Packet incomingPacket = PacketDispatcher.read(in);
+
+                MMServer.logger.info("Packet received: #" + incomingPacket.getType());
+                MMServer.logger.info("Packet Type:" + incomingPacket.getClass());
+
+//                String message = in.readUTF();
+//
+//                MMServer.logger.info("Client: " + message);
+
             } catch (IOException e) {
-                e.printStackTrace();
+                // includes disconnects, reset, etc.
+                MMServer.logger.warning("Connection lost: " + e.getMessage());
                 return;
             }
         }

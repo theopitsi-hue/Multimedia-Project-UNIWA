@@ -1,7 +1,4 @@
-package org.theopitsi.multimedia.server.data;
-
-import org.theopitsi.multimedia.common.data.VideoFormatType;
-import org.theopitsi.multimedia.common.data.VideoQualityType;
+package org.theopitsi.multimedia.common.data;
 
 import java.util.Objects;
 

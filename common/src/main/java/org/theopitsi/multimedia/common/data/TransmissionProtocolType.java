@@ -1,4 +1,4 @@
-package org.theopitsi.multimedia.server.connection;
+package org.theopitsi.multimedia.common.data;
 
 public enum TransmissionProtocolType {
     TCP,
