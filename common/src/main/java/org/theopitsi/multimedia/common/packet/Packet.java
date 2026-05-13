@@ -8,4 +8,5 @@ public abstract class Packet {
     public abstract int getType();
     public abstract void serialize(DataOutputStream out) throws IOException;
     public abstract void deserialize(DataInputStream in) throws IOException;
+    public int getResponceType(){return -1;}
 }

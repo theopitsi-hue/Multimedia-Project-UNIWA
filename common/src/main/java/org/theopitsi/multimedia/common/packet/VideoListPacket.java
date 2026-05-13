@@ -54,6 +54,10 @@ public class VideoListPacket{
                 data.add(new VideoData(title, format,quality));
             }
         }
+
+        public List<VideoData> getData() {
+            return data;
+        }
     }
 
     public static class Request extends Packet{
@@ -70,6 +74,11 @@ public class VideoListPacket{
         @Override
         public void deserialize(DataInputStream in) throws IOException {
 
+        }
+
+        @Override
+        public int getResponceType() {
+            return PacketType.VIDEO_LIST_RESP;
         }
     }
 }

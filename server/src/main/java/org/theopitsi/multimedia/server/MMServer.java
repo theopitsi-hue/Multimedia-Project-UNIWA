@@ -5,9 +5,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.theopitsi.multimedia.common.packet.Packet;
 import org.theopitsi.multimedia.server.connection.ConnectionManager;
+import org.theopitsi.multimedia.server.connection.client.ClientHandler;
 import org.theopitsi.multimedia.server.media.ContentManager;
-import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent;
 
 import java.util.logging.Logger;
 
@@ -29,7 +30,7 @@ public class MMServer extends Application {
 
         //manage connections without hanging graphics
         new Thread(()->{
-            connectionManager = new ConnectionManager(4);
+            connectionManager = new ConnectionManager();
             connectionManager.beginListening();
         }).start();
 

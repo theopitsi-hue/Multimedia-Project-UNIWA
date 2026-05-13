@@ -45,7 +45,7 @@ public class PacketDispatcher {
     }
 
     //todo: replace later with a more automatic system, im not gonna add every packet by hand here!
-    private static Packet createPacket(int type) {
+    public static Packet createPacket(int type) {
 
         return switch (type) {
 

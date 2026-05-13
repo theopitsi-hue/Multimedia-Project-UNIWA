@@ -7,21 +7,28 @@ import javafx.stage.Stage;
 import org.theopitsi.multimedia.client.data.Client;
 import org.theopitsi.multimedia.client.gui.MediaController;
 
+import java.io.IOException;
 import java.util.logging.Logger;
 
 public class MMClient extends Application {
     public static Logger logger = Logger.getLogger("MM-CLIENT");
     private static final int PORT = 5000;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         //makes logger more pretty.
         System.setProperty(
                 "java.util.logging.SimpleFormatter.format",
                 "[CLIENT][%1$tT/%4$s]: %5$s%n"
         );
 
-       Client main = new Client("Star");
-       main.connect("localhost", PORT);
+        new Thread(() -> {
+            Client main = new Client("Star");
+            try {
+                main.connect("localhost", PORT);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
        launch(args);
     }
 

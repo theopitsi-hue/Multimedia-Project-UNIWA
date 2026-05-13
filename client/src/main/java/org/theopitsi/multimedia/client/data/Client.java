@@ -1,6 +1,8 @@
 package org.theopitsi.multimedia.client.data;
 
 import org.theopitsi.multimedia.client.MMClient;
+import org.theopitsi.multimedia.client.packet.PacketHandler;
+import org.theopitsi.multimedia.common.packet.Packet;
 import org.theopitsi.multimedia.common.packet.VideoListPacket;
 import org.theopitsi.multimedia.common.packet.dispatch.PacketDispatcher;
 
@@ -11,31 +13,24 @@ public class Client {
     private final String identifier;
 
     private Socket socket;
-    private InputStream in;
-    private OutputStream out;
+    private DataInputStream in;
+    private DataOutputStream out;
 
     public Client(String name){
         this.identifier = name;
     }
 
-    public void connect(String addr, int port){
+    public void connect(String addr, int port) throws IOException {
         try {
             socket = new Socket(addr, port);
             MMClient.logger.info("Connected");
 
-            DataOutputStream out =
-                    new DataOutputStream(socket.getOutputStream());
+            out = new DataOutputStream(socket.getOutputStream());
+            in = new DataInputStream(socket.getInputStream());
 
-            DataInputStream in =
-                    new DataInputStream(socket.getInputStream());
-
-//            // identify
-//            out.writeUTF(identifier);
-//            out.flush();
-
-            //send request packet
             PacketDispatcher.write(out,new VideoListPacket.Request());
-            out.flush();
+                out.flush();
+
 //
 //            int i = 20;
 //
@@ -43,7 +38,7 @@ public class Client {
 //
 //                Thread.sleep(3000);
 //
-//                out.writeUTF("tick!");
+//                PacketDispatcher.write(out,new VideoListPacket.Request());
 //                out.flush();
 //
 //                MMClient.logger.info("beat");
@@ -55,9 +50,11 @@ public class Client {
             System.out.println(e);
             return;
         }
-//        } catch (InterruptedException e) {
+//        catch (InterruptedException e) {
 //            throw new RuntimeException(e);
 //        }
+
+        listen();
     }
 
     public void disconnect(){
@@ -67,6 +64,19 @@ public class Client {
             socket.close();
         }catch (Exception e){
             e.printStackTrace();
+        }
+    }
+
+    //listen for incoming packets
+    private void listen() throws IOException {
+        // main loop
+        while (true) {
+            try {
+                Packet incomingPacket = PacketDispatcher.read(in);
+                PacketHandler.OnPacketReceived(incomingPacket);
+            } catch (IOException e) {
+                return;
+            }
         }
     }
 }

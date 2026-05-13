@@ -1,4 +1,4 @@
-package org.theopitsi.multimedia.server.connection.user;
+package org.theopitsi.multimedia.common.data;
 
 import java.util.Objects;
 import java.util.UUID;
