@@ -5,5 +5,4 @@ plugins {
 }
 
 rootProject.name = "Multimedia-Project-UNIWA"
-include("app-client")
-include("app-server")
+include("server","common","client")

@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app-client/Multimedia-Project-UNIWA.app-client.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app-client/Multimedia-Project-UNIWA.app-client.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app-server/Multimedia-Project-UNIWA.app-server.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app-server/Multimedia-Project-UNIWA.app-server.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/client/Multimedia-Project-UNIWA.client.main.iml" filepath="$PROJECT_DIR$/.idea/modules/client/Multimedia-Project-UNIWA.client.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Multimedia-Project-UNIWA.common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Multimedia-Project-UNIWA.common.main.iml" />
     </modules>
   </component>
 </project>
