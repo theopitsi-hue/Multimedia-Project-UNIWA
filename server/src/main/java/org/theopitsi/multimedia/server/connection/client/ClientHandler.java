@@ -16,6 +16,8 @@ public class ClientHandler extends Thread {
     DataInputStream in = null;
     DataOutputStream out = null;
 
+    private volatile boolean running = true;
+
     public ClientHandler(Socket socket, int i) {
         this.clientSocket = socket;
         this.index = i;
@@ -32,6 +34,7 @@ public class ClientHandler extends Thread {
 
             MMServer.logger.info("Client connected: " + ip + ":" + port);
             ConnectionManager.register(index,this);
+
         } catch (IOException e) {
             MMServer.logger.warning(e.getLocalizedMessage());
             e.printStackTrace();
@@ -72,15 +75,6 @@ public class ClientHandler extends Thread {
             try {
                 Packet incomingPacket = PacketDispatcher.read(in);
                 PacketHandler.OnPacketReceived(index,incomingPacket);
-//                if (incomingPacket.getResponceType() == -1) return;
-//
-//                //create a response packet and fill it with data
-//                Packet response = PacketDispatcher.createPacket(incomingPacket.getResponceType());
-//
-//                //send it back to the client
-//                PacketDispatcher.write(out,response);
-//                out.flush();
-
             } catch (IOException e) {
                 // includes disconnects, reset, etc.
                 MMServer.logger.warning("Connection lost: " + e.getMessage());

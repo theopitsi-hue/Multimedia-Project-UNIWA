@@ -1,7 +1,11 @@
 package org.theopitsi.multimedia.server.connection;
 
+import org.theopitsi.multimedia.common.packet.HeartbeatPacket;
+import org.theopitsi.multimedia.common.packet.Packet;
 import org.theopitsi.multimedia.server.MMServer;
 import org.theopitsi.multimedia.server.connection.client.ClientHandler;
+import org.theopitsi.multimedia.server.connection.packet.PacketHandler;
+import org.theopitsi.multimedia.server.connection.packet.PacketManager;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -26,6 +30,19 @@ public class ConnectionManager {
 
     //captures incoming client communication
     public void beginListening() {
+        Thread heartbeatThread = new Thread(() -> {
+            while (!exiting) {
+                try {
+                    PacketManager.sendToAllClients(new HeartbeatPacket.Request());
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    return;
+                }
+            }
+        });
+
+        heartbeatThread.setDaemon(true);
+        heartbeatThread.start();
         //ServerSocket serverSocket = null;
         Socket clientSocket = null;
         ServerSocket serverSocket = null;
@@ -58,6 +75,7 @@ public class ConnectionManager {
     public static void register(int id, ClientHandler handler) {
         clients.put(id, handler);
         MMServer.logger.info("Client with id " + id + " connected, total: "+clients.size());
+        PacketHandler.OnClientConnected(id);
     }
 
     public static void remove(int id) {

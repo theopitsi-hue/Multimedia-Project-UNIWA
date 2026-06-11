@@ -1,8 +1,6 @@
 package org.theopitsi.multimedia.common.packet.dispatch;
 
-import org.theopitsi.multimedia.common.packet.Packet;
-import org.theopitsi.multimedia.common.packet.PacketType;
-import org.theopitsi.multimedia.common.packet.VideoListPacket;
+import org.theopitsi.multimedia.common.packet.*;
 
 import java.io.*;
 
@@ -54,6 +52,20 @@ public class PacketDispatcher {
 
             case PacketType.VIDEO_LIST_RESP ->
                     new VideoListPacket.Response();
+
+            case PacketType.HEARTBEAT_REQ ->
+                    new HeartbeatPacket.Request();
+
+            case PacketType.HEARTBEAT_RESP ->
+                    new HeartbeatPacket.Response();
+
+            case PacketType.BANDWIDTH_RESP ->
+                    new BandwidthPacket.Response();
+
+            case PacketType.BANDWIDTH_REQ ->
+                    new BandwidthPacket.Request();
+
+
 
             default ->
                     throw new RuntimeException("Unknown packet type: " + type);

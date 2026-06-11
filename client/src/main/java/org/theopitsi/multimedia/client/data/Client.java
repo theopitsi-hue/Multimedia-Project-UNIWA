@@ -28,31 +28,12 @@ public class Client {
             out = new DataOutputStream(socket.getOutputStream());
             in = new DataInputStream(socket.getInputStream());
 
-            PacketDispatcher.write(out,new VideoListPacket.Request());
-                out.flush();
-
-//
-//            int i = 20;
-//
-//            while (i > 0) {
-//
-//                Thread.sleep(3000);
-//
-//                PacketDispatcher.write(out,new VideoListPacket.Request());
-//                out.flush();
-//
-//                MMClient.logger.info("beat");
-//
-//                i--;
-//            }
+          PacketHandler.OnConnected(this);
 
         } catch (IOException e) {
             System.out.println(e);
             return;
         }
-//        catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
 
         listen();
     }
@@ -73,10 +54,26 @@ public class Client {
         while (true) {
             try {
                 Packet incomingPacket = PacketDispatcher.read(in);
-                PacketHandler.OnPacketReceived(incomingPacket);
+                PacketHandler.OnPacketReceived(this,incomingPacket);
             } catch (IOException e) {
+                MMClient.logger.warning("Connection lost");
+                e.printStackTrace();
                 return;
             }
         }
     }
+
+    //Sends to server
+    public synchronized boolean send(Packet packet) {
+        try {
+            PacketDispatcher.write(out, packet);
+            out.flush();
+            //MMClient.logger.info("Packet sent");
+            return true;
+        } catch (IOException e) {
+            MMClient.logger.warning("Send failed to send packet to server");
+            return false;
+        }
+    }
+
 }

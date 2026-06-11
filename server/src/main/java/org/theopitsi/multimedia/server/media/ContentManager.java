@@ -35,7 +35,7 @@ public class ContentManager {
     public void collectMedia(){
         scanMediaFolder();
         generateMissingMedia();
-
+        scanMediaFolder();
     }
 
     public File getVideoFile(VideoData data){
@@ -208,6 +208,8 @@ public class ContentManager {
             Encoder instance = new Encoder();
 
             instance.encode(new MultimediaObject(source), target, attrs, null);
+
+
         } catch (EncoderException e) {
             e.printStackTrace();
         }
