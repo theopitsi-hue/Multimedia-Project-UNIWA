@@ -1,5 +1,6 @@
 package org.theopitsi.multimedia.server.connection.client;
 
+import org.theopitsi.multimedia.common.data.VideoData;
 import org.theopitsi.multimedia.common.packet.Packet;
 import org.theopitsi.multimedia.common.packet.dispatch.PacketDispatcher;
 import org.theopitsi.multimedia.server.MMServer;
@@ -12,9 +13,13 @@ import java.net.*;
 //Operates for each client connected to the server
 public class ClientHandler extends Thread {
     private Socket clientSocket;
+
     public final int index;
     DataInputStream in = null;
     DataOutputStream out = null;
+
+    public volatile boolean isBeingStreamedTo = false;
+    public VideoData watching = null;
 
     private volatile boolean running = true;
 
@@ -27,7 +32,9 @@ public class ClientHandler extends Thread {
     public void run() {
         try {
             in = new DataInputStream(clientSocket.getInputStream());
-            out = new DataOutputStream(clientSocket.getOutputStream());
+            this.out = new DataOutputStream(
+                    new BufferedOutputStream(clientSocket.getOutputStream())
+            );
 
             var ip = clientSocket.getInetAddress().getHostAddress();
             var port = clientSocket.getPort();
@@ -82,5 +89,39 @@ public class ClientHandler extends Thread {
                 return;
             }
         }
+    }
+
+    public String getClientName(){
+        return "Client "+index;
+    }
+
+    public String getCurrentlyWatching() {
+        return watching == null?"idle":watching.getFilename();
+    }
+
+    public void setBeingStreamedTo(boolean se){
+        isBeingStreamedTo = se;
+    }
+
+    public boolean isBeingStreamedTo() {
+        return isBeingStreamedTo;
+    }
+
+    public void setWatching(VideoData selected) {
+        watching = selected;
+    }
+
+    public DataOutputStream getOut() {
+        return out;
+    }
+
+    private volatile DataOutputStream streamOut;
+
+    public void attachStreamOut(DataOutputStream out) {
+        this.streamOut = out;
+    }
+
+    public DataOutputStream getForStreamOut() {
+        return streamOut;
     }
 }

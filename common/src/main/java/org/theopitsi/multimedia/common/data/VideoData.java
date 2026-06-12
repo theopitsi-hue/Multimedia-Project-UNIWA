@@ -49,4 +49,5 @@ public class VideoData {
     public VideoQualityType getQuality() {
         return quality;
     }
+
 }

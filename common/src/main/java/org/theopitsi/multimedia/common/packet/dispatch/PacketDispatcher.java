@@ -32,8 +32,7 @@ public class PacketDispatcher {
         in.readFully(payload);
 
         DataInputStream packetIn =
-                new DataInputStream(
-                        new ByteArrayInputStream(payload));
+                new DataInputStream(new ByteArrayInputStream(payload));
 
         Packet packet = createPacket(type);
 
@@ -43,6 +42,7 @@ public class PacketDispatcher {
     }
 
     //todo: replace later with a more automatic system, im not gonna add every packet by hand here!
+    //new me: guess what bro
     public static Packet createPacket(int type) {
 
         return switch (type) {
@@ -65,7 +65,14 @@ public class PacketDispatcher {
             case PacketType.BANDWIDTH_REQ ->
                     new BandwidthPacket.Request();
 
+            case PacketType.VIDEO_REQ ->
+                    new VideoSelectPacket.Request();
 
+            case PacketType.VIDEO_RESP ->
+                    new VideoSelectPacket.Response();
+
+            case PacketType.STREAM_STOP ->
+                    new StreamStopPacket.Request();
 
             default ->
                     throw new RuntimeException("Unknown packet type: " + type);

@@ -44,7 +44,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="409.0" prefWidth="688.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+<VBox prefHeight="409.0" prefWidth="688.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.theopitsi.multimedia.client.gui.ClientController">
   <children>
     <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
       <children>
@@ -99,11 +99,11 @@
                                     <Insets left="4.0" right="4.0" top="2.0" />
                                  </padding>
                               </Label>
-                              <TableView fx:id="movieList" prefHeight="358.0" prefWidth="441.0">
+                              <TableView fx:id="VideoDataList" prefHeight="358.0" prefWidth="441.0">
                                 <columns>
-                                  <TableColumn editable="false" prefWidth="247.0" text="Name" />
-                                  <TableColumn editable="false" prefWidth="147.0" text="Resolution" />
-                                    <TableColumn editable="false" prefWidth="85.0" text="Format" />
+                                  <TableColumn fx:id="nameColumn" editable="false" prefWidth="233.0" text="Name" />
+                                  <TableColumn fx:id="resolutionColumn" editable="false" prefWidth="161.0" text="Resolution" />
+                                    <TableColumn fx:id="formatColumn" editable="false" prefWidth="85.0" text="Format" />
                                 </columns>
                                  <VBox.margin>
                                     <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
@@ -113,6 +113,7 @@
                                  <children>
                                     <Button fx:id="playMovieButton" alignment="BOTTOM_RIGHT" disable="true" layoutX="400.0" layoutY="2.0" minWidth="-Infinity" mnemonicParsing="false" text="Play Movie" textAlignment="CENTER" />
                                     <ChoiceBox fx:id="protocolChoice" layoutX="317.0" layoutY="2.0" prefHeight="25.0" prefWidth="74.0" />
+                                    <Button id="refresh" fx:id="refresh" alignment="BOTTOM_RIGHT" disable="true" layoutX="8.0" layoutY="2.0" minWidth="-Infinity" mnemonicParsing="false" text="Refresh" textAlignment="CENTER" />
                                  </children>
                               </Pane>
                            </children>

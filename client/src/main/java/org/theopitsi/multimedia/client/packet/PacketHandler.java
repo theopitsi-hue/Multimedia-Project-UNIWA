@@ -1,6 +1,6 @@
 package org.theopitsi.multimedia.client.packet;
 
-import fr.bmartel.speedtest.SpeedTestSocket;
+import javafx.application.Platform;
 import org.theopitsi.multimedia.client.MMClient;
 import org.theopitsi.multimedia.client.data.Client;
 import org.theopitsi.multimedia.common.packet.*;
@@ -14,8 +14,12 @@ public class PacketHandler {
 
         if (packet.getType() == PacketType.VIDEO_LIST_RESP) {
             VideoListPacket.Response res = (VideoListPacket.Response) packet;
-            MMClient.logger.info("Received video list data: ");
-            MMClient.logger.info(res.getData().get(0).toString());
+            MMClient.logger.info("Received video list data.");
+
+            Platform.runLater(() -> {
+                MMClient.clientController.setVideoList(res.getData());
+            });
+
         }
 
         if (packet.getType()==PacketType.HEARTBEAT_REQ){
@@ -24,8 +28,22 @@ public class PacketHandler {
         }
 
         if (packet.getType() == PacketType.BANDWIDTH_REQ){
-
+            //start a sample 10mb download to check speed.
+            //sends a response packet to the server once its successful
             speedTestSocket.startDownload("http://speedtest.ams1.nl.leaseweb.net/10mb.bin");
+        }
+
+        if (packet.getType() == PacketType.VIDEO_RESP){
+            VideoSelectPacket.Response res = (VideoSelectPacket.Response) packet;
+            if (res.getResult() == 0){ //OK
+                //start streaming
+                MMClient.logger.info("Should start streaming.");
+
+                MMClient.contentManager.startReceivingStream();
+
+            }else{
+                throw new RuntimeException("SOMETHING WRONG!");
+            }
         }
     }
 

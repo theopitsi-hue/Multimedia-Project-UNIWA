@@ -11,4 +11,11 @@ public class PacketType {                                       //  desc        
 
     public static final int BANDWIDTH_RESP = 4;                 // Requests user's bandwidth            / server -> client
     public static final int BANDWIDTH_REQ = 6;                  // replies user's bandwidth            / client -> server
+
+    public static final int VIDEO_REQ = 7;                      // Requests a specific video            / client -> server
+    public static final int VIDEO_RESP = 8;                     // Accepts or denies it                 / server -> client
+    public static final int VIDEO_CHUNK = 9;                    // chunk of the current streaming video / server -> client
+
+    public static final int STREAM_STOP = 10;                    // client stops watching cur videop     / client -> server
+
 }

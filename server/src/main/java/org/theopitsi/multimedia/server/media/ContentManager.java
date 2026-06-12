@@ -20,9 +20,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+import static org.theopitsi.multimedia.server.MMServer.serverController;
+
 public class ContentManager {
-    //todo: have the user be able to set this
-    private static final String videoDir = "B:/Code/GitHub/Multimedia-Project-UNIWA/Videos";
+    public static final String videoDir = Paths.get(
+            System.getProperty("user.home"),
+            "Documents",
+            "VideoPlayer",
+            "server"
+    ).toString()+"/";
 
     //this might be hard to itterate per property. woops.
     private final HashMap<VideoData,Path> videoDatabase = new HashMap<>();
@@ -36,6 +42,10 @@ public class ContentManager {
         scanMediaFolder();
         generateMissingMedia();
         scanMediaFolder();
+    }
+
+    public List<VideoData> getVideos(){
+        return videoDatabase.keySet().stream().toList();
     }
 
     public File getVideoFile(VideoData data){
@@ -143,7 +153,6 @@ public class ContentManager {
             }
         }
         MMServer.logger.warning("Found " + count + " video files.");
-
     }
 
     private void generateMissingMedia(){

@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 import org.theopitsi.multimedia.common.packet.Packet;
 import org.theopitsi.multimedia.server.connection.ConnectionManager;
 import org.theopitsi.multimedia.server.connection.client.ClientHandler;
+import org.theopitsi.multimedia.server.gui.ServerController;
 import org.theopitsi.multimedia.server.media.ContentManager;
 
 import java.util.logging.Logger;
@@ -16,14 +17,18 @@ public class MMServer extends Application {
     public static Logger logger = Logger.getLogger("MM-SERVER");
     public static ConnectionManager connectionManager;
     public static ContentManager contentManager;
+    public static ServerController serverController;
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/ui/server.fxml"));
-        stage.setTitle("MMServer");
-        stage.setScene(new Scene(root));
-        stage.show();
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/ui/server.fxml")
+        );
 
+        Scene scene = new Scene(loader.load());
+        stage.setTitle("Media Server");
+        stage.setScene(scene);
+        stage.show();
 
         contentManager = new ContentManager();
         contentManager.collectMedia();
@@ -34,6 +39,8 @@ public class MMServer extends Application {
             connectionManager.beginListening();
         }).start();
 
+        serverController = loader.getController();
+        serverController.setVideos(contentManager.getVideos());
     }
 
     public static void main(String[] args) {

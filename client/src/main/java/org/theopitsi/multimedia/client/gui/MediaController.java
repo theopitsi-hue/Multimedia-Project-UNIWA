@@ -8,6 +8,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.text.Text;
+import org.theopitsi.multimedia.client.MMClient;
 
 import java.io.File;
 
@@ -32,6 +33,7 @@ public class MediaController {
 
     @FXML
     public void initialize() {
+
         mediaVolumeSlider.setMin(0);
         mediaVolumeSlider.setMax(1);
         mediaVolumeSlider.setValue(0.5);
@@ -39,52 +41,74 @@ public class MediaController {
         mediaPlay.setOnAction(e -> togglePlay());
     }
 
-    /**
-     * Load and play a media file
-     */
     public void playMedia(String filePath) {
+
         try {
+
             File file = new File(filePath);
-            //MMServer.logger.info(filePath);
+
             Media media = new Media(file.toURI().toString());
 
             if (mediaPlayer != null) {
                 mediaPlayer.stop();
+                mediaPlayer.dispose();
             }
 
             mediaPlayer = new MediaPlayer(media);
+
             mediaView.setMediaPlayer(mediaPlayer);
 
-            // Bind volume
-            mediaPlayer.volumeProperty().bind(mediaVolumeSlider.valueProperty());
+            mediaPlayer.volumeProperty().bind(
+                    mediaVolumeSlider.valueProperty()
+            );
 
-            mediaDebugText.setText("Now Watching: " + file.getName());
+            mediaDebugText.setText(
+                    "Now Watching: " + file.getName()
+            );
 
             mediaPlayer.play();
 
         } catch (Exception e) {
+
             e.printStackTrace();
             mediaDebugText.setText("Error loading media");
         }
     }
 
-    /**
-     * Play / Pause toggle
-     */
     private void togglePlay() {
-        if (mediaPlayer == null) return;
+
+        if (mediaPlayer == null) {
+            return;
+        }
 
         switch (mediaPlayer.getStatus()) {
-            case MediaPlayer.Status.PLAYING:
+
+            case PLAYING:
                 mediaPlayer.pause();
                 mediaPlay.setText("Play");
                 break;
-            case MediaPlayer.Status.PAUSED:
-            case MediaPlayer.Status.READY:
-            case MediaPlayer.Status.STOPPED:
+
+            case PAUSED:
+            case READY:
+            case STOPPED:
                 mediaPlayer.play();
                 mediaPlay.setText("Pause");
                 break;
         }
+    }
+
+    public void onWindowClosed() {
+
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.dispose();
+        }
+
+        System.out.println("Media window closed");
+
+        MMClient.contentManager.setVideo(null);
+
+        // Example:
+        // MMClient.main.send(new StreamStopPacket.Request());
     }
 }
