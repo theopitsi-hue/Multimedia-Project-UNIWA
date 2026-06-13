@@ -48,6 +48,18 @@ public class ContentManager {
         return videoDatabase.keySet().stream().toList();
     }
 
+    public List<VideoData> getFilteredVideos(double mbps){
+        List<VideoData> filtered = new ArrayList<>();
+
+        for (int i = 0; i < getVideos().size(); i++) {
+            var q = getVideos().get(i).getQuality();
+            if (q.meetsSpeedReq(mbps)){
+                filtered.add(getVideos().get(i));
+            }
+        }
+        return filtered;
+    }
+
     public File getVideoFile(VideoData data){
         Path videosDir = Paths.get(videoDir);
         final File folder = new File(videoDir);

@@ -56,6 +56,7 @@ public class Client {
             if (in != null) in.close();
             if (out != null) out.close();
             if (controlSocket != null) controlSocket.close();
+            contentStreamIntake.disconnect();
         } catch (Exception e) {
             e.printStackTrace();
         }

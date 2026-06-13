@@ -22,6 +22,7 @@ public class ClientHandler extends Thread {
     public VideoData watching = null;
 
     private volatile boolean running = true;
+    private volatile double lastBandwidthMbps;
 
     public ClientHandler(Socket socket, int i) {
         this.clientSocket = socket;
@@ -124,5 +125,13 @@ public class ClientHandler extends Thread {
 
     public void setStreamOutput(DataOutputStream outStream) {
         streamOut = outStream;
+    }
+
+    public void setLastDownSpeed(double bandwidthMbps) {
+        lastBandwidthMbps = bandwidthMbps;
+    }
+
+    public double getLastDownloadSpeed() {
+        return lastBandwidthMbps;
     }
 }

@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import org.theopitsi.multimedia.client.data.Client;
 import org.theopitsi.multimedia.client.data.ContentStreamReceiver;
 import org.theopitsi.multimedia.client.gui.ClientController;
+import org.theopitsi.multimedia.client.stream.FfmpegStreamReceiver;
 import org.theopitsi.multimedia.common.data.ClientState;
 import org.theopitsi.multimedia.common.packet.BandwidthPacket;
 
@@ -32,6 +33,7 @@ public class MMClient extends Application {
     public  static ContentStreamReceiver contentManager;
 
     public static ClientController clientController;
+    public static FfmpegStreamReceiver streamReceiver;
 
     public static void main(String[] args) throws IOException {
         //makes logger more pretty.
@@ -68,6 +70,8 @@ public class MMClient extends Application {
             }
         });
 
+        streamReceiver = new FfmpegStreamReceiver("localhost", 5003);
+
         new Thread(() -> {
             main = new Client("Star");
             try {
@@ -89,10 +93,18 @@ public class MMClient extends Application {
         stage.setTitle("Media Client");
         stage.setScene(scene);
         stage.show();
+        stage.setOnCloseRequest(event ->
+               shutItDown()
+        );
+
 
         clientController = loader.getController();
     }
 
+    public void shutItDown(){
+        main.disconnect();
+        System.exit(0);
+    }
 
 
 

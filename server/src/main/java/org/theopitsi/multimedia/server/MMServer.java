@@ -2,13 +2,11 @@ package org.theopitsi.multimedia.server;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.theopitsi.multimedia.common.packet.Packet;
+import org.theopitsi.multimedia.server.stream.FFmpegStreamManager;
 import org.theopitsi.multimedia.server.connection.ConnectionManager;
 import org.theopitsi.multimedia.server.connection.ContentStreamOutput;
-import org.theopitsi.multimedia.server.connection.client.ClientHandler;
 import org.theopitsi.multimedia.server.gui.ServerController;
 import org.theopitsi.multimedia.server.media.ContentManager;
 
@@ -20,6 +18,7 @@ public class MMServer extends Application {
     public static ContentStreamOutput connectionStreamOutput;
     public static ContentManager contentManager;
     public static ServerController serverController;
+    public static FFmpegStreamManager streamManager;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -31,9 +30,14 @@ public class MMServer extends Application {
         stage.setTitle("Media Server");
         stage.setScene(scene);
         stage.show();
+        stage.setOnCloseRequest(event ->
+                shutItDown()
+        );
 
         contentManager = new ContentManager();
         contentManager.collectMedia();
+
+        streamManager = new FFmpegStreamManager("localhost",5003);
 
         //manage connections without hanging graphics
         new Thread(()->{
@@ -46,6 +50,10 @@ public class MMServer extends Application {
 
         serverController = loader.getController();
         serverController.setVideos(contentManager.getVideos());
+    }
+
+    private void shutItDown() {
+        System.exit(0);
     }
 
     public static void main(String[] args) {

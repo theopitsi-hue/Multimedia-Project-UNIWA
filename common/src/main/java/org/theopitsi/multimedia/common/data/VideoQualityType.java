@@ -9,13 +9,13 @@ public enum VideoQualityType {
     p720(1500,4000,2500),
     p1080(3000,6000, 3000);
 
-    public final int max;
-    public final int min;
-    public final int rec;
+    public final double max;
+    public final double min;
+    public final double rec;
 
     /// A video quality enum that takes in the maximum, minimum and recommended kbps
     /// to use for determining the max quality of video a user can see.
-    VideoQualityType(int min, int max, int rec){
+    VideoQualityType(double min, double max, double rec){
         this.max = max;
         this.min = min;
         this.rec = rec;
@@ -48,9 +48,11 @@ public enum VideoQualityType {
     }
 
     /// if le given kbps speed is enough to support this quality. Used to filter vid list
-    public boolean meetsSpeedReq(int kbps){
-        return kbps >= min && kbps <= max;
+    public boolean meetsSpeedReq(double mbps) {
+        double kbps = mbps * 1000;
+        return kbps >= min;
     }
+
 
     @Override
     public String toString() {
@@ -79,6 +81,23 @@ public enum VideoQualityType {
             }
             default -> {
                 return new VideoSize(1920,1080);
+            }
+        }
+    }
+
+    public TransmissionProtocolType getRecomendedProtocol() {
+        switch (this){
+            case p240 -> {
+                return TransmissionProtocolType.TCP;
+            }
+            case p360,p480 -> {
+                return TransmissionProtocolType.UDP;
+            }
+            case p720,p1080 -> {
+                return TransmissionProtocolType.RTP;
+            }
+            default -> {
+                return TransmissionProtocolType.RTP;
             }
         }
     }

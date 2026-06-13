@@ -8,8 +8,11 @@ import org.theopitsi.multimedia.client.MMClient;
 import org.theopitsi.multimedia.common.data.VideoData;
 import org.theopitsi.multimedia.common.data.VideoFormatType;
 import org.theopitsi.multimedia.common.data.VideoQualityType;
+import org.theopitsi.multimedia.common.packet.VideoListPacket;
 
 import java.util.List;
+
+import static org.theopitsi.multimedia.client.MMClient.speedTestSocket;
 
 public class ClientController {
 
@@ -24,6 +27,9 @@ public class ClientController {
 
     @FXML
     private Button playMovieButton;
+
+    @FXML
+    private Button refresh;
 
     @FXML
     private ChoiceBox<String> protocolChoice;
@@ -41,7 +47,7 @@ public class ClientController {
 
     @FXML
     public void initialize() {
-
+        refresh.setDisable(false);
         nameColumn.setCellValueFactory(data ->
                 new SimpleStringProperty(data.getValue().getFilename())
         );
@@ -61,13 +67,16 @@ public class ClientController {
 
         //protocol choices
         protocolChoice.setItems(FXCollections.observableArrayList(
-                "TCP",
-                "UDP",
-                "RTP",
-                "Auto"
+                "ProjectAuto",
+                "CustomTCP"
         ));
 
         protocolChoice.getSelectionModel().selectFirst();
+
+        protocolChoice.getSelectionModel().selectedItemProperty().addListener(
+                (obs, old, ne)->
+                        protocolSelectionChanged(ne)
+        );
 
         //enable play button when a VideoData is selected
         VideoDataList.getSelectionModel().selectedItemProperty().addListener(
@@ -78,6 +87,17 @@ public class ClientController {
         connectionButton.setOnAction(event -> toggleConnection());
 
         playMovieButton.setOnAction(event -> playSelectedVideoData());
+
+
+        refresh.setOnAction(event -> refreshStuff());
+    }
+
+    private void protocolSelectionChanged(String ne) {
+    }
+
+    private void refreshStuff() {
+        speedTestSocket.startDownload("http://speedtest.ams1.nl.leaseweb.net/10mb.bin");
+        MMClient.main.sendToServer(new VideoListPacket.Request());
     }
 
     private void toggleConnection() {
@@ -93,15 +113,15 @@ public class ClientController {
 
     @FXML
     private void playSelectedVideoData() {
-
         VideoData VideoData = VideoDataList.getSelectionModel().getSelectedItem();
+        String protocol = protocolChoice.getSelectionModel().getSelectedItem();
 
         if (VideoData == null) {
             return;
         }
 
         //send play packet
-        MMClient.contentManager.setVideoWatching(VideoData);
+        MMClient.contentManager.setVideoWatching(VideoData, protocol);
     }
 
     public void updateDownloadRate(double mbps) {

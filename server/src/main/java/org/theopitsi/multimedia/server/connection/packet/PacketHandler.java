@@ -1,12 +1,10 @@
 package org.theopitsi.multimedia.server.connection.packet;
 
-import org.theopitsi.multimedia.common.data.VideoData;
-import org.theopitsi.multimedia.common.data.VideoFormatType;
+import org.theopitsi.multimedia.common.data.TransmissionProtocolType;
 import org.theopitsi.multimedia.common.data.VideoQualityType;
 import org.theopitsi.multimedia.common.packet.*;
 import org.theopitsi.multimedia.server.MMServer;
-
-import java.util.List;
+import org.theopitsi.multimedia.server.connection.ConnectionManager;
 
 public class PacketHandler {
 
@@ -15,14 +13,13 @@ public class PacketHandler {
         //MMServer.logger.info(clientId+" - Packet received: #" + packet.getType());
         //MMServer.logger.info(clientId+" - Packet Type:" + packet.getClass());
 
-        if (packet.getType() == PacketType.VIDEO_LIST_REQ) {
-            PacketManager.sendToClient(clientId, new VideoListPacket.Response(MMServer.contentManager.getVideos()));
-        }
-
         if (packet.getType() == PacketType.BANDWIDTH_RESP) {
             BandwidthPacket.Response resp = ( BandwidthPacket.Response) packet;
 
             MMServer.logger.info("Client "+clientId+" bandwidth: "+resp.getBandwidthMbps()+" mbps");
+            ConnectionManager.getClient(clientId).setLastDownSpeed(resp.getBandwidthMbps());
+            PacketManager.sendToClient(clientId, new VideoListPacket.Response(MMServer.contentManager.getFilteredVideos(resp.getBandwidthMbps())));
+
             return;
         }
 
@@ -31,8 +28,18 @@ public class PacketHandler {
 
             VideoSelectPacket.Request a = (VideoSelectPacket.Request) packet;
             MMServer.logger.info("Client "+clientId+" requested: "+a.getSelected());
-            MMServer.connectionStreamOutput.startStreamingTo(clientId, a.getSelected());
-            PacketManager.sendToClient(clientId, new VideoSelectPacket.Response(0));
+
+            if (!a.getProtocol().equals("ProjectAuto")) {
+                // do custom tcp
+                MMServer.logger.info("STARTING CUSTOM STREAMING");
+                MMServer.connectionStreamOutput.startStreamingTo(clientId, a.getSelected());
+                PacketManager.sendToClient(clientId, new VideoSelectPacket.Response(0, TransmissionProtocolType.TCP));
+            }else{
+                //do FFMPEG server
+                MMServer.logger.info("STARTING FFMPEG STREAMING");
+                MMServer.streamManager.streamForClient(clientId,a.getSelected(), a.getSelected().getQuality().getRecomendedProtocol().toString().toLowerCase());
+                PacketManager.sendToClient(clientId, new VideoSelectPacket.Response(1,a.getSelected().getQuality().getRecomendedProtocol()));
+            }
         }
 
         if (packet.getType() == PacketType.STREAM_STOP){

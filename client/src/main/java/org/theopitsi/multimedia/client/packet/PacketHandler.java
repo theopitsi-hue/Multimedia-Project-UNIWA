@@ -35,9 +35,12 @@ public class PacketHandler {
 
         if (packet.getType() == PacketType.VIDEO_RESP){
             VideoSelectPacket.Response res = (VideoSelectPacket.Response) packet;
-            if (res.getResult() == 0){ //OK
+            if (res.getResult() == 0) { //OK
                 //start streaming
                 MMClient.logger.info("Should start streaming.");
+            }else if (res.getResult() == 1){
+                MMClient.logger.info("capturing STREAM VIA FFMPEG.");
+                MMClient.streamReceiver.beginCapturingStream(res.getProtocol());
 
             }else{
                 throw new RuntimeException("SOMETHING WRONG!");

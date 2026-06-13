@@ -29,6 +29,7 @@ public class ContentStreamReceiver {
     private volatile int cId;
 
     public static VideoData watching = null;
+    public static String protocol = null;
     public volatile static boolean mediaPlayerOpen = false;
 
     private void startPlayback() {
@@ -64,11 +65,13 @@ public class ContentStreamReceiver {
         }
     }
 
-    public void setVideoWatching(VideoData videoData) {
+    public void setVideoWatching(VideoData videoData, String protool) {
         watching = videoData;
+        protocol = protool;
 
         if (watching != null) {
-            MMClient.main.sendToServer(new VideoSelectPacket.Request(watching));
+            MMClient.main.sendToServer(new VideoSelectPacket.Request(watching,protool));
+            //uh, start ffmpeg reading here?
         }else{
             MMClient.main.sendToServer(new StreamStopPacket.Request());
         }
@@ -76,7 +79,7 @@ public class ContentStreamReceiver {
 
     //WORKS, just needs some fixes with cache
     public void receiveStream(DataInputStream in, DataOutputStream out) {
-        if (watching == null) return;
+        if (watching == null || protocol.equals("ProjectAuto")) return;
 
         File tempFile = new File(videoDir + "cache/"+ watching.toFileName());
         tempFile.getParentFile().mkdirs();
@@ -156,7 +159,7 @@ public class ContentStreamReceiver {
         mediaController.onWindowClosed();
         mediaPlayerOpen = false;
 
-        MMClient.contentManager.setVideoWatching(null);
+        MMClient.contentManager.setVideoWatching(null, null);
 
         clearCacheFolder();
     }
@@ -191,5 +194,15 @@ public class ContentStreamReceiver {
         }
 
         file.delete();
+    }
+
+    public void disconnect() {
+        try {
+            if (streamIn != null) streamIn.close();
+            if (streamOut != null) streamOut.close();
+            if (streamSocket != null) streamSocket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
