@@ -4,18 +4,21 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Slider;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaView;
+import javafx.scene.image.ImageView;
 import javafx.scene.text.Text;
+
 import org.theopitsi.multimedia.client.MMClient;
+
+import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
+import uk.co.caprica.vlcj.javafx.videosurface.ImageViewVideoSurface;
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 import java.io.File;
 
 public class MediaController {
 
     @FXML
-    private MediaView mediaView;
+    private ImageView videoView;
 
     @FXML
     private Button mediaPlay;
@@ -29,14 +32,27 @@ public class MediaController {
     @FXML
     private Text mediaDebugText;
 
-    private MediaPlayer mediaPlayer;
+    private MediaPlayerFactory factory;
+    private EmbeddedMediaPlayer mediaPlayer;
 
     @FXML
     public void initialize() {
 
         mediaVolumeSlider.setMin(0);
-        mediaVolumeSlider.setMax(1);
-        mediaVolumeSlider.setValue(0.5);
+        mediaVolumeSlider.setMax(100);
+        mediaVolumeSlider.setValue(50);
+
+        factory = new MediaPlayerFactory();
+        mediaPlayer = factory.mediaPlayers().newEmbeddedMediaPlayer();
+
+        mediaPlayer.videoSurface().set(
+                new ImageViewVideoSurface(videoView)
+        );
+
+        mediaVolumeSlider.valueProperty().addListener(
+                (obs, oldVal, newVal) ->
+                        mediaPlayer.audio().setVolume(newVal.intValue())
+        );
 
         mediaPlay.setOnAction(e -> togglePlay());
     }
@@ -47,26 +63,13 @@ public class MediaController {
 
             File file = new File(filePath);
 
-            Media media = new Media(file.toURI().toString());
-
-            if (mediaPlayer != null) {
-                mediaPlayer.stop();
-                mediaPlayer.dispose();
-            }
-
-            mediaPlayer = new MediaPlayer(media);
-
-            mediaView.setMediaPlayer(mediaPlayer);
-
-            mediaPlayer.volumeProperty().bind(
-                    mediaVolumeSlider.valueProperty()
-            );
-
             mediaDebugText.setText(
                     "Now Watching: " + file.getName()
             );
 
-            mediaPlayer.play();
+            mediaPlayer.media().play(file.getAbsolutePath());
+
+            mediaPlay.setText("Pause");
 
         } catch (Exception e) {
 
@@ -77,33 +80,28 @@ public class MediaController {
 
     private void togglePlay() {
 
-        if (mediaPlayer == null) {
-            return;
-        }
+        if (mediaPlayer.status().isPlaying()) {
 
-        switch (mediaPlayer.getStatus()) {
+            mediaPlayer.controls().pause();
+            mediaPlay.setText("Play");
 
-            case PLAYING:
-                mediaPlayer.pause();
-                mediaPlay.setText("Play");
-                break;
+        } else {
 
-            case PAUSED:
-            case READY:
-            case STOPPED:
-                mediaPlayer.play();
-                mediaPlay.setText("Pause");
-                break;
+            mediaPlayer.controls().play();
+            mediaPlay.setText("Pause");
         }
     }
 
     public void onWindowClosed() {
 
         if (mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer.dispose();
+            mediaPlayer.release();
         }
 
-        System.out.println("Media window closed");
+        if (factory != null) {
+            factory.release();
+        }
+
+        MMClient.logger.info("Media window closed");
     }
 }

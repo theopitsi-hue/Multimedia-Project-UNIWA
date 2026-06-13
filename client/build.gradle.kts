@@ -30,6 +30,11 @@ dependencies {
     implementation("fr.bmartel:jspeedtest:1.32.1")
     testImplementation("fr.bmartel:jspeedtest:1.32.1")
 
+    implementation("uk.co.caprica:vlcj:4.8.3")
+    implementation("uk.co.caprica:vlcj-javafx:1.2.0")
+
+    implementation("net.java.dev.jna:jna:5.14.0")
+    implementation("net.java.dev.jna:jna-platform:5.14.0")
 
 }
 
@@ -49,5 +54,5 @@ tasks.named<Test>("test") {
 
 javafx {
     version = "21"
-    modules = listOf("javafx.controls", "javafx.fxml", "javafx.media")
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.media", "javafx.graphics")
 }

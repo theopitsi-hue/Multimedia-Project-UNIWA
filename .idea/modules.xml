@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/client/Multimedia-Project-UNIWA.client.main.iml" filepath="$PROJECT_DIR$/.idea/modules/client/Multimedia-Project-UNIWA.client.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/common/Multimedia-Project-UNIWA.common.main.iml" filepath="$PROJECT_DIR$/.idea/modules/common/Multimedia-Project-UNIWA.common.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/server/Multimedia-Project-UNIWA.server.main.iml" filepath="$PROJECT_DIR$/.idea/modules/server/Multimedia-Project-UNIWA.server.main.iml" />
     </modules>
   </component>
 </project>
