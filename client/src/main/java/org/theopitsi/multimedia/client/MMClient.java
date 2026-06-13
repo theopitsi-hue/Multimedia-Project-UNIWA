@@ -51,7 +51,12 @@ public class MMClient extends Application {
                 double mbps = report.getTransferRateBit().doubleValue() / 1_000_000.0;
                 System.out.println("[COMPLETED] rate in Mbps: " + mbps);
                 lastTransferRateBit = mbps;
-                main.sendToServer(new BandwidthPacket.Response(mbps));
+                var format = 0;
+
+                if (clientController!=null){
+                    format = clientController.filterFormat.ordinal();
+                }
+                main.sendToServer(new BandwidthPacket.Response(mbps,format));
 
                 Platform.runLater(() -> {
                     MMClient.clientController.updateDownloadRate(mbps);
@@ -70,7 +75,7 @@ public class MMClient extends Application {
             }
         });
 
-        streamReceiver = new FfmpegStreamReceiver("localhost", 5003);
+        streamReceiver = new FfmpegStreamReceiver("localhost", 696969);
 
         new Thread(() -> {
             main = new Client("Star");

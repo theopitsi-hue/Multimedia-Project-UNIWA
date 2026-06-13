@@ -18,7 +18,7 @@ public class PacketHandler {
 
             MMServer.logger.info("Client "+clientId+" bandwidth: "+resp.getBandwidthMbps()+" mbps");
             ConnectionManager.getClient(clientId).setLastDownSpeed(resp.getBandwidthMbps());
-            PacketManager.sendToClient(clientId, new VideoListPacket.Response(MMServer.contentManager.getFilteredVideos(resp.getBandwidthMbps())));
+            PacketManager.sendToClient(clientId, new VideoListPacket.Response(MMServer.contentManager.getFilteredVideos(resp.getBandwidthMbps(), resp.getFormat())));
 
             return;
         }

@@ -9,6 +9,10 @@ public enum VideoFormatType {
         if (format.endsWith(".avi"))return AVI;
         if (format.endsWith(".mp4"))return MP4;
         if (format.endsWith(".mkv"))return MKV;
+
+        if (format.equalsIgnoreCase("avi"))return AVI;
+        if (format.equalsIgnoreCase("mp4"))return MP4;
+        if (format.equalsIgnoreCase("mkv"))return MKV;
         return null;
     }
 

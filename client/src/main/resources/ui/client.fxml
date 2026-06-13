@@ -114,6 +114,7 @@
                                     <Button fx:id="playMovieButton" alignment="BOTTOM_RIGHT" disable="true" layoutX="400.0" layoutY="2.0" minWidth="-Infinity" mnemonicParsing="false" text="Play Movie" textAlignment="CENTER" />
                                     <ChoiceBox fx:id="protocolChoice" layoutX="317.0" layoutY="2.0" prefHeight="25.0" prefWidth="74.0" />
                                     <Button id="refresh" fx:id="refresh" alignment="BOTTOM_RIGHT" disable="true" layoutX="8.0" layoutY="2.0" minWidth="-Infinity" mnemonicParsing="false" text="Refresh" textAlignment="CENTER" />
+                                    <ChoiceBox id="formatChoice" fx:id="formatChoice" layoutX="235.0" layoutY="2.0" prefHeight="25.0" prefWidth="74.0" />
                                  </children>
                               </Pane>
                            </children>

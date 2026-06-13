@@ -16,6 +16,7 @@ import static org.theopitsi.multimedia.client.MMClient.speedTestSocket;
 
 public class ClientController {
 
+    public VideoFormatType filterFormat = VideoFormatType.MP4;
     @FXML
     private Button connectionButton;
 
@@ -33,6 +34,9 @@ public class ClientController {
 
     @FXML
     private ChoiceBox<String> protocolChoice;
+
+    @FXML
+    private ChoiceBox<String> formatChoice;
 
     private boolean connected = true;
 
@@ -71,11 +75,23 @@ public class ClientController {
                 "CustomTCP"
         ));
 
+        formatChoice.setItems(FXCollections.observableArrayList(
+                "MP4",
+                "MKV",
+                "AVI"
+        ));
+
         protocolChoice.getSelectionModel().selectFirst();
+        formatChoice.getSelectionModel().selectFirst();
 
         protocolChoice.getSelectionModel().selectedItemProperty().addListener(
                 (obs, old, ne)->
                         protocolSelectionChanged(ne)
+        );
+
+        formatChoice.getSelectionModel().selectedItemProperty().addListener(
+                (obs, old, ne)->
+                        formatChoiceSelectionChanged(ne)
         );
 
         //enable play button when a VideoData is selected
@@ -92,11 +108,16 @@ public class ClientController {
         refresh.setOnAction(event -> refreshStuff());
     }
 
+    private void formatChoiceSelectionChanged(String ne) {
+        filterFormat = VideoFormatType.valueOf(ne);
+    }
+
     private void protocolSelectionChanged(String ne) {
     }
 
     private void refreshStuff() {
-        speedTestSocket.startDownload("http://speedtest.ams1.nl.leaseweb.net/10mb.bin");
+        //5 second speed test
+        speedTestSocket.startDownload("http://speedtest.ams1.nl.leaseweb.net/10mb.bin",5000);
         MMClient.main.sendToServer(new VideoListPacket.Request());
     }
 
@@ -120,13 +141,14 @@ public class ClientController {
             return;
         }
 
+        MMClient.streamReceiver.stop();
         //send play packet
         MMClient.contentManager.setVideoWatching(VideoData, protocol);
     }
 
     public void updateDownloadRate(double mbps) {
         downloadRateDisplay.setText(
-                String.format("Download Rate: %.2f mb/s", mbps)
+                String.format("Download Rate: %.2f mb/s", mbps/8f)
         );
     }
 

@@ -20,8 +20,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-import static org.theopitsi.multimedia.server.MMServer.serverController;
-
 public class ContentManager {
     public static final String videoDir = Paths.get(
             System.getProperty("user.home"),
@@ -48,12 +46,12 @@ public class ContentManager {
         return videoDatabase.keySet().stream().toList();
     }
 
-    public List<VideoData> getFilteredVideos(double mbps){
+    public List<VideoData> getFilteredVideos(double mbps, VideoFormatType format){
         List<VideoData> filtered = new ArrayList<>();
 
         for (int i = 0; i < getVideos().size(); i++) {
             var q = getVideos().get(i).getQuality();
-            if (q.meetsSpeedReq(mbps)){
+            if (q.meetsSpeedReq(mbps) &&  getVideos().get(i).getFormat() == format){
                 filtered.add(getVideos().get(i));
             }
         }

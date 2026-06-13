@@ -33,17 +33,6 @@ public class ServerController {
     @FXML
     private TableColumn<VideoData, String> formatColumn;
 
-    @FXML
-    private Label clientCapacityText;
-
-    @FXML
-    private Label statusMessageText;
-
-    @FXML
-    private ProgressBar progressBar;
-
-    @FXML
-    private Button forceDisconnectClient;
 
     @FXML
     public void initialize() {
@@ -68,16 +57,8 @@ public class ServerController {
                 new SimpleStringProperty(data.getValue().getFormat().toString())
         );
 
-        forceDisconnectClient.setDisable(true);
 
-        clientList.getSelectionModel()
-                .selectedItemProperty()
-                .addListener((obs, oldValue, newValue) ->
-                        forceDisconnectClient.setDisable(newValue == null)
-                );
 
-        progressBar.setProgress(0);
-        statusMessageText.setText("Status: Idle");
     }
 
     public void setVideos(List<VideoData> videos) {
@@ -94,26 +75,7 @@ public class ServerController {
                 ));
     }
 
-    public void updateCapacity(int current, int max) {
-        Platform.runLater(() ->
-                clientCapacityText.setText(
-                        "Accepting Clients: " + current + "/" + max
-                ));
-    }
-
-    public void updateStatus(String status) {
-        Platform.runLater(() ->
-                statusMessageText.setText(
-                        "Status: " + status
-                ));
-    }
-
-    public void updateProgress(double progress) {
-        Platform.runLater(() ->
-                progressBar.setProgress(progress)
-        );
-    }
-
+    
     @FXML
     private void forceDisconnectSelectedClient() {
 

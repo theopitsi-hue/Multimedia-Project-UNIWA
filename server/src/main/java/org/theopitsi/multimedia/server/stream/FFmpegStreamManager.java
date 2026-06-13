@@ -3,13 +3,27 @@ package org.theopitsi.multimedia.server.stream;
 import org.theopitsi.multimedia.common.data.VideoData;
 import org.theopitsi.multimedia.server.MMServer;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FFmpegStreamManager {
 
-    private static final Map<Integer, Process> activeClientProcesses = new ConcurrentHashMap<>();
+    private static class ProcessHandle {
+        final Process process;
+        final Thread ioThread;
+
+        ProcessHandle(Process process, Thread ioThread) {
+            this.process = process;
+            this.ioThread = ioThread;
+        }
+    }
+
+    private static final Map<Integer, ProcessHandle> activeClientProcesses = new ConcurrentHashMap<>();
 
     private final String host;
     private final int port;
@@ -26,25 +40,47 @@ public class FFmpegStreamManager {
 
         try {
             ProcessBuilder pb = new ProcessBuilder(buildCommand(input, protocol));
-
             pb.redirectErrorStream(true);
 
             Process process = pb.start();
-            activeClientProcesses.put(clientId, process);
+
+            Thread ioThread = createLoggingThread(clientId, process);
+            ioThread.start();
+
+            activeClientProcesses.put(clientId, new ProcessHandle(process, ioThread));
 
         } catch (IOException e) {
             throw new RuntimeException("Failed to start stream for client " + clientId, e);
         }
     }
 
-    private String[] buildCommand(String input, String protocol) {
+    private Thread createLoggingThread(int clientId, Process process) {
+        Thread t = new Thread(() -> {
+            try (BufferedReader reader =
+                         new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println("[ffmpeg-client-" + clientId + "] " + line);
+                }
+
+            } catch (IOException ignored) {
+            }
+        });
+
+        t.setName("ffmpeg-client-" + clientId + "-io");
+        t.setDaemon(true);
+        return t;
+    }
+
+    private String[] buildCommand(String input, String protocol) throws IOException {
 
         String target;
 
         return switch (protocol.toLowerCase()) {
 
             case "tcp" -> {
-                target = "tcp://" + host + ":" + port;
+                target = "tcp://" + host + ":" + port+ "?listen=1";
                 yield baseFFmpeg(input, target, "mpegts");
             }
 
@@ -54,14 +90,24 @@ public class FFmpegStreamManager {
             }
 
             case "rtp" -> {
+                String dir = Paths.get(
+                        System.getProperty("user.home"),
+                        "Documents",
+                        "VideoPlayer",
+                        "sdp"
+                ).toString();
+
+                Files.createDirectories(Paths.get(dir));
+
+                String sdpPath = Paths.get(dir, "stream.sdp").toString();
                 target = "rtp://" + host + ":" + port;
+
                 yield new String[]{
                         "ffmpeg",
                         "-re",
                         "-stream_loop", "-1",
                         "-i", input,
 
-                        // FIX: stabilize encoding + decoder entry points
                         "-c:v", "libx264",
                         "-preset", "veryfast",
                         "-tune", "zerolatency",
@@ -72,6 +118,7 @@ public class FFmpegStreamManager {
                         "-sc_threshold", "0",
 
                         "-f", "rtp",
+                        "-sdp_file", sdpPath,
                         target
                 };
             }
@@ -80,23 +127,17 @@ public class FFmpegStreamManager {
         };
     }
 
-    /**
-     * FIX: shared stable encoding profile for TCP/UDP
-     */
     private String[] baseFFmpeg(String input, String target, String format) {
         return new String[]{
                 "ffmpeg",
 
-                // FIX: ensures real-time pacing without buffering spikes
                 "-re",
                 "-stream_loop", "-1",
                 "-i", input,
 
-                // FIX: prevents decode stalls & startup freeze
                 "-fflags", "nobuffer",
                 "-flags", "low_delay",
 
-                // FIX: consistent GOP structure (critical for FFplay startup issues)
                 "-c:v", "libx264",
                 "-preset", "veryfast",
                 "-tune", "zerolatency",
@@ -110,22 +151,26 @@ public class FFmpegStreamManager {
     }
 
     public void stopClient(int clientId) {
-        Process p = activeClientProcesses.remove(clientId);
+        ProcessHandle handle = activeClientProcesses.remove(clientId);
 
-        if (p != null && p.isAlive()) {
-            // FIX: force termination (destroy() alone often leaves FFmpeg hanging)
+        if (handle == null) return;
+
+        Process p = handle.process;
+
+        if (p.isAlive()) {
             p.destroyForcibly();
+        }
+
+        try {
+            handle.ioThread.join(2000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
     public void stopAll() {
-        for (Map.Entry<Integer, Process> entry : activeClientProcesses.entrySet()) {
-            Process p = entry.getValue();
-
-            if (p != null && p.isAlive()) {
-                p.destroyForcibly();
-            }
+        for (Integer clientId : activeClientProcesses.keySet()) {
+            stopClient(clientId);
         }
-        activeClientProcesses.clear();
     }
 }

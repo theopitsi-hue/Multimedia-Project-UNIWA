@@ -37,7 +37,7 @@ public class MMServer extends Application {
         contentManager = new ContentManager();
         contentManager.collectMedia();
 
-        streamManager = new FFmpegStreamManager("localhost",5003);
+        streamManager = new FFmpegStreamManager("localhost",696969);
 
         //manage connections without hanging graphics
         new Thread(()->{

@@ -1,6 +1,7 @@
 package org.theopitsi.multimedia.client.stream;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class FfmpegStreamReceiver {
@@ -26,6 +27,16 @@ public class FfmpegStreamReceiver {
             pb.redirectErrorStream(true);
 
             process = pb.start();
+
+            new Thread(() -> {
+                try (var reader = new java.io.BufferedReader(
+                        new java.io.InputStreamReader(process.getInputStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                } catch (IOException ignored) {}
+            }).start();
 
         } catch (IOException e) {
             throw new RuntimeException("Failed to start stream receiver", e);
@@ -61,7 +72,12 @@ public class FfmpegStreamReceiver {
                 return new String[]{
                         "ffplay",
                         "-protocol_whitelist", "file,udp,rtp",
-                        url
+                        Paths.get(
+                                System.getProperty("user.home"),
+                                "Documents",
+                                "VideoPlayer",
+                                "sdp"
+                        ).toString()+"\\"+"stream.sdp"
                 };
 
             default:
@@ -70,8 +86,18 @@ public class FfmpegStreamReceiver {
     }
 
     public void stop() {
-        if (process != null && process.isAlive()) {
+        if (process != null) {
             process.destroy();
+
+            try {
+                if (!process.waitFor(2, java.util.concurrent.TimeUnit.SECONDS)) {
+                    process.destroyForcibly();
+                }
+            } catch (InterruptedException ignored) {
+                process.destroyForcibly();
+                Thread.currentThread().interrupt();
+            }
+
             process = null;
         }
     }
