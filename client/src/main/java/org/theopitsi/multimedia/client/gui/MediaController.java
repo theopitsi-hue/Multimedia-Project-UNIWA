@@ -105,10 +105,5 @@ public class MediaController {
         }
 
         System.out.println("Media window closed");
-
-        MMClient.contentManager.setVideo(null);
-
-        // Example:
-        // MMClient.main.send(new StreamStopPacket.Request());
     }
 }

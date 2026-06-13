@@ -28,7 +28,7 @@ public class ContentManager {
             "Documents",
             "VideoPlayer",
             "server"
-    ).toString()+"/";
+    ).toString()+"\\";
 
     //this might be hard to itterate per property. woops.
     private final HashMap<VideoData,Path> videoDatabase = new HashMap<>();

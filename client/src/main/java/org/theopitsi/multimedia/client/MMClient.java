@@ -10,7 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.theopitsi.multimedia.client.data.Client;
-import org.theopitsi.multimedia.client.data.ContentStreamManager;
+import org.theopitsi.multimedia.client.data.ContentStreamReceiver;
 import org.theopitsi.multimedia.client.gui.ClientController;
 import org.theopitsi.multimedia.common.data.ClientState;
 import org.theopitsi.multimedia.common.packet.BandwidthPacket;
@@ -29,7 +29,7 @@ public class MMClient extends Application {
     public static double lastTransferRateBit;
     public static Client main;
 
-    public  static ContentStreamManager contentManager;
+    public  static ContentStreamReceiver contentManager;
 
     public static ClientController clientController;
 
@@ -40,7 +40,7 @@ public class MMClient extends Application {
                 "[CLIENT][%1$tT/%4$s]: %5$s%n"
         );
 
-        contentManager = new ContentStreamManager();
+        contentManager = new ContentStreamReceiver();
 
         // add a listener to wait for speedtest completion and progress
         speedTestSocket.addSpeedTestListener(new ISpeedTestListener() {
@@ -49,7 +49,7 @@ public class MMClient extends Application {
                 double mbps = report.getTransferRateBit().doubleValue() / 1_000_000.0;
                 System.out.println("[COMPLETED] rate in Mbps: " + mbps);
                 lastTransferRateBit = mbps;
-                main.send(new BandwidthPacket.Response(mbps));
+                main.sendToServer(new BandwidthPacket.Response(mbps));
 
                 Platform.runLater(() -> {
                     MMClient.clientController.updateDownloadRate(mbps);
@@ -71,7 +71,7 @@ public class MMClient extends Application {
         new Thread(() -> {
             main = new Client("Star");
             try {
-                main.connect("localhost", PORT,STREAM_PORT);
+                main.connect("localhost", PORT);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

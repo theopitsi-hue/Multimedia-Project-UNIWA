@@ -74,6 +74,12 @@ public class PacketDispatcher {
             case PacketType.STREAM_STOP ->
                     new StreamStopPacket.Request();
 
+            case PacketType.HANDSHAKE_REQ ->
+                    new HandshakePacket.Request();
+
+            case PacketType.HANDSHAKE_RESP ->
+                    new HandshakePacket.Response();
+
             default ->
                     throw new RuntimeException("Unknown packet type: " + type);
         };

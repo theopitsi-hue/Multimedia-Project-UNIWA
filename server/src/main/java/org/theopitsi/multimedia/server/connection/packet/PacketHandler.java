@@ -12,8 +12,8 @@ public class PacketHandler {
 
     //packets received from a specific client
     public static void OnPacketReceived(int clientId, Packet packet){
-        MMServer.logger.info(clientId+" - Packet received: #" + packet.getType());
-        MMServer.logger.info(clientId+" - Packet Type:" + packet.getClass());
+        //MMServer.logger.info(clientId+" - Packet received: #" + packet.getType());
+        //MMServer.logger.info(clientId+" - Packet Type:" + packet.getClass());
 
         if (packet.getType() == PacketType.VIDEO_LIST_REQ) {
             PacketManager.sendToClient(clientId, new VideoListPacket.Response(MMServer.contentManager.getVideos()));
@@ -31,13 +31,17 @@ public class PacketHandler {
 
             VideoSelectPacket.Request a = (VideoSelectPacket.Request) packet;
             MMServer.logger.info("Client "+clientId+" requested: "+a.getSelected());
-            MMServer.connectionManager.startStreamingTo(clientId, a.getSelected());
+            MMServer.connectionStreamOutput.startStreamingTo(clientId, a.getSelected());
             PacketManager.sendToClient(clientId, new VideoSelectPacket.Response(0));
         }
 
         if (packet.getType() == PacketType.STREAM_STOP){
             MMServer.logger.info("Client "+clientId+" stopped stream.");
-            MMServer.connectionManager.stopStreamingTo(clientId);
+            MMServer.connectionStreamOutput.stopStreamingTo(clientId);
+        }
+
+        if (packet.getType() == PacketType.HANDSHAKE_REQ){
+            PacketManager.sendToClient(clientId, new HandshakePacket.Response(clientId));
         }
     }
 

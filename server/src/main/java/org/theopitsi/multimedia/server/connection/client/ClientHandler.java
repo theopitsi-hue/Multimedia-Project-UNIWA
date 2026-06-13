@@ -26,6 +26,7 @@ public class ClientHandler extends Thread {
     public ClientHandler(Socket socket, int i) {
         this.clientSocket = socket;
         this.index = i;
+
     }
 
     @Override
@@ -40,12 +41,12 @@ public class ClientHandler extends Thread {
             var port = clientSocket.getPort();
 
             MMServer.logger.info("Client connected: " + ip + ":" + port);
-            ConnectionManager.register(index,this);
+            ConnectionManager.registerClient(index,this);
 
         } catch (IOException e) {
             MMServer.logger.warning(e.getLocalizedMessage());
             e.printStackTrace();
-            ConnectionManager.remove(index);
+            ConnectionManager.removeClient(index);
             return;
         }
 
@@ -55,7 +56,7 @@ public class ClientHandler extends Thread {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }finally {
-            ConnectionManager.remove(index);
+            ConnectionManager.removeClient(index);
 
             try {
                 clientSocket.close();
@@ -85,7 +86,7 @@ public class ClientHandler extends Thread {
             } catch (IOException e) {
                 // includes disconnects, reset, etc.
                 MMServer.logger.warning("Connection lost: " + e.getMessage());
-                ConnectionManager.remove(index);
+                ConnectionManager.removeClient(index);
                 return;
             }
         }
@@ -117,11 +118,11 @@ public class ClientHandler extends Thread {
 
     private volatile DataOutputStream streamOut;
 
-    public void attachStreamOut(DataOutputStream out) {
-        this.streamOut = out;
+    public DataOutputStream getStreamOut() {
+        return streamOut;
     }
 
-    public DataOutputStream getForStreamOut() {
-        return streamOut;
+    public void setStreamOutput(DataOutputStream outStream) {
+        streamOut = outStream;
     }
 }

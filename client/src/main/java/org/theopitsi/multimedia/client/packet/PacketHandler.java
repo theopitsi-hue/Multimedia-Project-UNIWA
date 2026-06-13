@@ -10,7 +10,7 @@ import static org.theopitsi.multimedia.client.MMClient.speedTestSocket;
 public class PacketHandler {
     //packets received from server
     public static void OnPacketReceived(Client client, Packet packet){
-        MMClient.logger.info("client received packet: #"+packet.getType());
+        //MMClient.logger.info("client received packet: #"+packet.getType());
 
         if (packet.getType() == PacketType.VIDEO_LIST_RESP) {
             VideoListPacket.Response res = (VideoListPacket.Response) packet;
@@ -23,7 +23,7 @@ public class PacketHandler {
         }
 
         if (packet.getType()==PacketType.HEARTBEAT_REQ){
-            client.send(new HeartbeatPacket.Response());
+            client.sendToServer(new HeartbeatPacket.Response());
             //MMClient.logger.info("Heartbeat on client!");
         }
 
@@ -39,15 +39,21 @@ public class PacketHandler {
                 //start streaming
                 MMClient.logger.info("Should start streaming.");
 
-                MMClient.contentManager.startReceivingStream();
-
             }else{
                 throw new RuntimeException("SOMETHING WRONG!");
             }
+            return;
+        }
+
+        if (packet.getType() == PacketType.HANDSHAKE_RESP){
+            HandshakePacket.Response res = (HandshakePacket.Response) packet;
+            MMClient.logger.info("Set clientid: "+res.getResult());
+            client.setClientId(res.getResult());
         }
     }
 
-    public static void OnConnected(Client client) {
-        client.send(new VideoListPacket.Request());
+    public static void OnConnectedToServer(Client client) {
+        client.sendToServer(new HandshakePacket.Request());
+        client.sendToServer(new VideoListPacket.Request());
     }
 }

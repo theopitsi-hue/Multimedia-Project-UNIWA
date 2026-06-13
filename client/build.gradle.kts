@@ -30,7 +30,6 @@ dependencies {
     implementation("fr.bmartel:jspeedtest:1.32.1")
     testImplementation("fr.bmartel:jspeedtest:1.32.1")
 
-    //FFMPEG
 
 }
 

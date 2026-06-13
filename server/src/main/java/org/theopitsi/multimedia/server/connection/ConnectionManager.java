@@ -1,12 +1,10 @@
 package org.theopitsi.multimedia.server.connection;
 
-import org.theopitsi.multimedia.common.data.VideoData;
 import org.theopitsi.multimedia.common.packet.HeartbeatPacket;
 import org.theopitsi.multimedia.server.MMServer;
 import org.theopitsi.multimedia.server.connection.client.ClientHandler;
 import org.theopitsi.multimedia.server.connection.packet.PacketHandler;
 import org.theopitsi.multimedia.server.connection.packet.PacketManager;
-import org.theopitsi.multimedia.server.media.ContentManager;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -18,19 +16,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.theopitsi.multimedia.server.MMServer.serverController;
 
 public class ConnectionManager {
-
     private volatile boolean exiting = false;
 
     private static final int CONTROL_PORT = 5000;
-    private static final int STREAM_PORT = 5001;
 
     private ServerSocket controlSocket;
-    private ServerSocket streamSocket;
-
     private static final Map<Integer, ClientHandler> clients = new ConcurrentHashMap<>();
-    private static final Map<Integer, Thread> streamThreads = new ConcurrentHashMap<>();
 
-    private int idCounter = 1;
+    private int idCounter = 0;
 
     public static List<ClientHandler> getAllClients() {
         return clients.values().stream().toList();
@@ -40,7 +33,6 @@ public class ConnectionManager {
         startHeartbeat();
 
         startControlListener();
-        startStreamListener();
     }
 
     private void startControlListener() {
@@ -65,54 +57,7 @@ public class ConnectionManager {
         }, "control-listener").start();
     }
 
-    private void startStreamListener() {
-        new Thread(() -> {
-            try {
-                streamSocket = new ServerSocket(STREAM_PORT);
-                MMServer.logger.info("Stream server listening on " + STREAM_PORT);
-
-                while (!exiting) {
-
-                    Socket socket = streamSocket.accept();
-
-                    new Thread(() -> handleStreamSocket(socket),
-                            "stream-socket-handler").start();
-                }
-
-            } catch (IOException e) {
-                if (!exiting) {
-                    MMServer.logger.warning("Stream socket error: " + e.getMessage());
-                }
-            }
-
-        }, "stream-listener").start();
-    }
-
-    private void handleStreamSocket(Socket socket) {
-
-        try (Socket s = socket;
-             DataOutputStream out = new DataOutputStream(s.getOutputStream());
-             DataInputStream in = new DataInputStream(s.getInputStream())) {
-
-            //IMPORTANT:
-            //first message MUST be clientId from client!!!!
-            int clientId = in.readInt();
-
-            ClientHandler client = clients.get(clientId);
-            if (client == null) return;
-
-            client.attachStreamOut(out);
-
-            // keep socket alive while streaming
-            while (!exiting && client.isBeingStreamedTo()) {
-                Thread.sleep(50);
-            }
-
-        } catch (Exception e) {
-            MMServer.logger.warning("Stream socket error: " + e.getMessage());
-        }
-    }
-
+    // Sends heartbeat signals to clients
     private void startHeartbeat() {
 
         Thread heartbeat = new Thread(() -> {
@@ -130,14 +75,14 @@ public class ConnectionManager {
 
     public void exit() {
         exiting = true;
-
         try {
             if (controlSocket != null) controlSocket.close();
-            if (streamSocket != null) streamSocket.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+            MMServer.logger.warning("Stream socket error: " + ignored.getMessage());
+        }
     }
 
-    public static void register(int id, ClientHandler handler) {
+    public static void registerClient(int id, ClientHandler handler) {
         clients.put(id, handler);
 
         MMServer.logger.info("Client " + id + " connected. Total: " + clients.size());
@@ -146,10 +91,10 @@ public class ConnectionManager {
         serverController.setClients(clients.values().stream().toList());
     }
 
-    public static void remove(int id) {
+    public static void removeClient(int id) {
         clients.remove(id);
 
-        Thread t = streamThreads.remove(id);
+        Thread t = MMServer.connectionStreamOutput.remove(id);
         if (t != null) t.interrupt();
 
         serverController.setClients(clients.values().stream().toList());
@@ -157,69 +102,5 @@ public class ConnectionManager {
 
     public static ClientHandler getClient(int id) {
         return clients.get(id);
-    }
-
-    public void startStreamingTo(int clientId, VideoData selected) {
-
-        ClientHandler client = clients.get(clientId);
-        if (client == null) return;
-
-        client.setBeingStreamedTo(true);
-        client.setWatching(selected);
-
-        Thread streamThread = new Thread(() -> {
-            try {
-                streamLoop(clientId);
-            } catch (IOException e) {
-                MMServer.logger.warning("Stream error: " + e.getMessage());
-            }
-        }, "stream-client-" + clientId);
-
-        streamThreads.put(clientId, streamThread);
-        streamThread.start();
-    }
-
-    public void streamLoop(int clientId) throws IOException {
-        ClientHandler client = clients.get(clientId);
-
-        if (client == null || client.watching == null) {
-            MMServer.logger.warning("Stream not ready for client " + clientId);
-            return;
-        }
-
-        DataOutputStream out = client.getForStreamOut();
-
-        File file = new File(ContentManager.videoDir + client.watching.toFileName());
-
-        try (FileInputStream fis = new FileInputStream(file)) {
-
-            out.writeUTF(file.getName());
-            out.writeLong(file.length());
-
-            byte[] buffer = new byte[8192];
-            int read;
-
-            while (client.isBeingStreamedTo()
-                    && (read = fis.read(buffer)) != -1) {
-
-                out.writeInt(read);
-                out.write(buffer, 0, read);
-            }
-
-            out.writeInt(-1);
-            out.flush();
-        }
-    }
-
-    public void stopStreamingTo(int clientId) {
-
-        ClientHandler client = clients.get(clientId);
-        if (client != null) {
-            client.setBeingStreamedTo(false);
-            client.setWatching(null);
-        }
-
-        Thread t = streamThreads.remove(clientId);
-        if (t != null) t.interrupt();
     }
 }

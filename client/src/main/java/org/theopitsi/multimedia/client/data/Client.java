@@ -9,7 +9,6 @@ import java.io.*;
 import java.net.Socket;
 
 public class Client {
-
     private final String identifier;
 
     // CONTROL SOCKET
@@ -17,42 +16,39 @@ public class Client {
     private DataInputStream in;
     private DataOutputStream out;
 
-    // STREAM SOCKET
-    private Socket streamSocket;
-    private DataOutputStream streamOut;
-    private DataInputStream streamIn;
+    private volatile int clientId = 0;
 
-    private int clientId = 1;
+    private final ContentStreamReceiver contentStreamIntake;
 
     public Client(String name) {
         this.identifier = name;
+        contentStreamIntake = new ContentStreamReceiver();
     }
 
-    public void connect(String addr, int controlPort, int streamPort) throws IOException {
-
+    public void connect(String addr, int controlPort) throws IOException {
         // CONTROL CONNECTION
         controlSocket = new Socket(addr, controlPort);
 
         out = new DataOutputStream(controlSocket.getOutputStream());
         in = new DataInputStream(controlSocket.getInputStream());
 
-        MMClient.logger.info("Control connected");
+        MMClient.logger.info("Control socket created");
 
-        PacketHandler.OnConnected(this);
-
+        PacketHandler.OnConnectedToServer(this);
         listenControl();
+    }
 
-        // STREAM CONNECTION (separate socket)
-        streamSocket = new Socket(addr, streamPort);
 
-        streamOut = new DataOutputStream(streamSocket.getOutputStream());
-        streamIn = new DataInputStream(streamSocket.getInputStream());
+    public void setClientId(int id){
+        clientId = id;
+        new Thread(() -> {
+            try {
+                contentStreamIntake.connect(id, "localhost", 5001);
 
-        // IMPORTANT: register session with server
-        streamOut.writeInt(clientId);
-        streamOut.flush();
-
-        MMClient.logger.info("Stream connected");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
     }
 
     public void disconnect() {
@@ -60,18 +56,12 @@ public class Client {
             if (in != null) in.close();
             if (out != null) out.close();
             if (controlSocket != null) controlSocket.close();
-
-            if (streamIn != null) streamIn.close();
-            if (streamOut != null) streamOut.close();
-            if (streamSocket != null) streamSocket.close();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void listenControl() {
-
         new Thread(() -> {
 
             while (true) {
@@ -88,7 +78,7 @@ public class Client {
         }, "control-listener").start();
     }
 
-    public synchronized boolean send(Packet packet) {
+    public synchronized boolean sendToServer(Packet packet) {
         try {
             PacketDispatcher.write(out, packet);
             out.flush();

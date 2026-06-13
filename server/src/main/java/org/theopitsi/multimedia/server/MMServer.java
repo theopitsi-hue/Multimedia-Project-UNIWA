@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.theopitsi.multimedia.common.packet.Packet;
 import org.theopitsi.multimedia.server.connection.ConnectionManager;
+import org.theopitsi.multimedia.server.connection.ContentStreamOutput;
 import org.theopitsi.multimedia.server.connection.client.ClientHandler;
 import org.theopitsi.multimedia.server.gui.ServerController;
 import org.theopitsi.multimedia.server.media.ContentManager;
@@ -16,6 +17,7 @@ import java.util.logging.Logger;
 public class MMServer extends Application {
     public static Logger logger = Logger.getLogger("MM-SERVER");
     public static ConnectionManager connectionManager;
+    public static ContentStreamOutput connectionStreamOutput;
     public static ContentManager contentManager;
     public static ServerController serverController;
 
@@ -36,7 +38,10 @@ public class MMServer extends Application {
         //manage connections without hanging graphics
         new Thread(()->{
             connectionManager = new ConnectionManager();
+            connectionStreamOutput = new ContentStreamOutput();
+
             connectionManager.beginListening();
+            connectionStreamOutput.beginListening();
         }).start();
 
         serverController = loader.getController();

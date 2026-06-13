@@ -3,18 +3,12 @@ package org.theopitsi.multimedia.client.gui;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.stage.Stage;
 import org.theopitsi.multimedia.client.MMClient;
 import org.theopitsi.multimedia.common.data.VideoData;
 import org.theopitsi.multimedia.common.data.VideoFormatType;
 import org.theopitsi.multimedia.common.data.VideoQualityType;
-import org.theopitsi.multimedia.common.packet.BandwidthPacket;
-import org.theopitsi.multimedia.common.packet.VideoSelectPacket;
 
-import java.io.IOException;
 import java.util.List;
 
 public class ClientController {
@@ -106,8 +100,8 @@ public class ClientController {
             return;
         }
 
-        //send stop packet to client
-        MMClient.contentManager.setVideo(VideoData);
+        //send play packet
+        MMClient.contentManager.setVideoWatching(VideoData);
     }
 
     public void updateDownloadRate(double mbps) {
